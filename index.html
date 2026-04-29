@@ -7,340 +7,447 @@
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background: #f5f7fa;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 20px;
-    }
-    header {
-      text-align: center;
-      margin-top: 40px;
-      margin-bottom: 30px;
-    }
-    h1 {
-      font-size: 28px;
-      color: #1a73e8;
-      margin-bottom: 8px;
-    }
-    .subtitle {
-      color: #5f6368;
-      font-size: 14px;
-    }
-    .card {
-      background: white;
-      border-radius: 12px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
-      padding: 30px;
-      max-width: 500px;
-      width: 100%;
-      margin-bottom: 20px;
-    }
-    button {
-      background: #1a73e8;
-      color: white;
-      border: none;
-      padding: 12px 24px;
-      border-radius: 8px;
-      font-size: 15px;
-      font-weight: 600;
-      cursor: pointer;
-      width: 100%;
-      transition: background 0.2s;
-    }
-    button:hover { background: #1557b0; }
-    button:disabled {
-      background: #ccc;
-      cursor: not-allowed;
-    }
-    button.secondary {
-      background: white;
-      color: #1a73e8;
-      border: 1px solid #1a73e8;
-      margin-top: 10px;
-    }
-    button.secondary:hover { background: #f0f5ff; }
-    .info-box {
-      background: #e8f0fe;
-      border-left: 4px solid #1a73e8;
-      padding: 12px 16px;
-      border-radius: 4px;
-      margin-bottom: 20px;
-      font-size: 14px;
-      color: #1a73e8;
-    }
-    .user-info {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 12px;
-      background: #f0f5ff;
-      border-radius: 8px;
-      margin-bottom: 16px;
-    }
-    .user-info img {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-    }
-    .user-info .name {
-      font-weight: 600;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, sans-serif;
+      background: #fafbfc;
       color: #1a1a1a;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
     }
-    .user-info .email {
-      font-size: 13px;
-      color: #5f6368;
+    :root {
+      --ta1-bg: #DCEEFB; --ta1-border: #5BA3D0; --ta1-dark: #2C5F7C;
+      --ta2-bg: #FCE8D4; --ta2-border: #E89D5C; --ta2-dark: #8B4F1F;
+      --ta3-bg: #DCEDDC; --ta3-border: #6FA76F; --ta3-dark: #3A6B3A;
+      --primary: #2563eb; --primary-dark: #1e40af;
+      --bg-card: #ffffff; --bg-empty: #f8fafc;
+      --border: #e2e8f0; --text: #1e293b; --text-muted: #64748b;
+      --pause-bg: #f1f5f9;
     }
-    #status {
-      padding: 12px;
-      border-radius: 6px;
-      margin-top: 12px;
-      font-size: 14px;
-      display: none;
-    }
-    .status-error {
-      background: #fce8e6;
-      color: #c5221f;
-      border-left: 4px solid #c5221f;
-    }
-    .status-success {
-      background: #e6f4ea;
-      color: #1e8e3e;
-      border-left: 4px solid #1e8e3e;
-    }
-    .status-info {
-      background: #e8f0fe;
-      color: #1a73e8;
-      border-left: 4px solid #1a73e8;
-    }
-    pre {
-      background: #f8f9fa;
-      padding: 12px;
-      border-radius: 6px;
-      font-size: 12px;
-      overflow-x: auto;
-      max-height: 400px;
-      overflow-y: auto;
-      border: 1px solid #e0e0e0;
-    }
+    header { background: white; border-bottom: 1px solid var(--border); padding: 16px 20px; position: sticky; top: 0; z-index: 50; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+    .header-row { display: flex; justify-content: space-between; align-items: center; max-width: 1400px; margin: 0 auto; gap: 16px; flex-wrap: wrap; }
+    h1 { font-size: 20px; font-weight: 700; color: var(--primary-dark); }
+    .header-user { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--text-muted); }
+    .header-user img { width: 32px; height: 32px; border-radius: 50%; }
+    main { max-width: 1400px; margin: 0 auto; padding: 20px; }
+    .card { background: var(--bg-card); border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); padding: 24px; margin-bottom: 16px; border: 1px solid var(--border); }
+    button { background: var(--primary); color: white; border: none; padding: 10px 18px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.15s; }
+    button:hover { background: var(--primary-dark); }
+    button:disabled { background: #cbd5e1; cursor: not-allowed; }
+    button.secondary { background: white; color: var(--primary); border: 1px solid var(--border); }
+    button.secondary:hover { background: #f1f5f9; }
+    button.compact { padding: 6px 12px; font-size: 13px; }
+    #screen-login { max-width: 440px; margin: 60px auto; text-align: center; }
+    #screen-login h2 { font-size: 22px; margin-bottom: 8px; }
+    #screen-login p { color: var(--text-muted); margin-bottom: 24px; font-size: 15px; }
+    #btn-login { width: 100%; padding: 14px; font-size: 15px; }
+    .week-nav { background: white; border-radius: 12px; padding: 20px; margin-bottom: 16px; border: 1px solid var(--border); }
+    .week-nav-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+    .week-nav-title { font-size: 15px; font-weight: 600; color: var(--text); }
+    .week-nav-arrows { display: flex; gap: 8px; }
+    .month-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-bottom: 12px; }
+    .month-grid-header { text-align: center; font-size: 11px; font-weight: 600; color: var(--text-muted); padding: 4px 0; text-transform: uppercase; }
+    .day-cell { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-size: 13px; border-radius: 6px; cursor: pointer; transition: all 0.15s; color: var(--text); position: relative; }
+    .day-cell:hover { background: #f1f5f9; }
+    .day-cell.other-month { color: #cbd5e1; cursor: default; }
+    .day-cell.other-month:hover { background: transparent; }
+    .day-cell.in-week-selected { background: var(--ta1-bg); color: var(--ta1-dark); font-weight: 600; }
+    .day-cell.is-monday-selectable { cursor: pointer; font-weight: 600; }
+    .day-cell.today { box-shadow: inset 0 0 0 2px var(--primary); font-weight: 700; }
+    .planning-wrapper { background: white; border-radius: 12px; border: 1px solid var(--border); overflow: hidden; }
+    .planning-info { padding: 14px 20px; background: #f8fafc; border-bottom: 1px solid var(--border); font-size: 14px; font-weight: 600; color: var(--text); display: flex; justify-content: space-between; align-items: center; }
+    .planning-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    table.planning { border-collapse: collapse; width: 100%; min-width: 900px; font-size: 12px; }
+    table.planning th, table.planning td { border: 1px solid #e2e8f0; padding: 0; vertical-align: top; text-align: center; }
+    table.planning thead .day-header { background: #f1f5f9; font-weight: 700; padding: 8px 4px; font-size: 12px; color: var(--text); border-bottom: 2px solid #cbd5e1; }
+    table.planning thead .ta-header { padding: 6px 4px; font-weight: 600; font-size: 11px; }
+    .ta-header.ta1 { background: var(--ta1-bg); color: var(--ta1-dark); }
+    .ta-header.ta2 { background: var(--ta2-bg); color: var(--ta2-dark); }
+    .ta-header.ta3 { background: var(--ta3-bg); color: var(--ta3-dark); }
+    table.planning td.hour-cell { background: #f8fafc; color: var(--text-muted); font-weight: 600; font-size: 11px; padding: 4px 6px; width: 60px; min-width: 60px; white-space: nowrap; }
+    table.planning td.slot { background: var(--bg-empty); height: 36px; min-width: 90px; padding: 2px 4px; cursor: pointer; transition: background 0.15s; }
+    table.planning td.slot:hover { background: #f1f5f9; }
+    table.planning td.pause { background: var(--pause-bg); cursor: default; color: var(--text-muted); font-style: italic; font-size: 10px; }
+    table.planning td.pause:hover { background: var(--pause-bg); }
+    table.planning td.occupied { cursor: pointer; padding: 4px 6px; font-size: 11px; line-height: 1.3; text-align: left; }
+    table.planning td.occupied.ta1 { background: var(--ta1-bg); color: var(--ta1-dark); border-left: 3px solid var(--ta1-border); }
+    table.planning td.occupied.ta2 { background: var(--ta2-bg); color: var(--ta2-dark); border-left: 3px solid var(--ta2-border); }
+    table.planning td.occupied.ta3 { background: var(--ta3-bg); color: var(--ta3-dark); border-left: 3px solid var(--ta3-border); }
+    table.planning td.occupied .client { font-weight: 700; display: block; }
+    table.planning td.occupied .forfait { font-size: 10px; opacity: 0.85; display: block; }
+    table.planning td.continuation { cursor: pointer; }
+    .recap-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-top: 16px; }
+    .recap-card { background: white; border-radius: 10px; padding: 16px; border: 1px solid var(--border); border-left-width: 4px; }
+    .recap-card.ta1 { border-left-color: var(--ta1-border); }
+    .recap-card.ta2 { border-left-color: var(--ta2-border); }
+    .recap-card.ta3 { border-left-color: var(--ta3-border); }
+    .recap-card.global { border-left-color: var(--primary); }
+    .recap-title { font-size: 12px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 12px; letter-spacing: 0.5px; }
+    .recap-card.ta1 .recap-title { color: var(--ta1-dark); }
+    .recap-card.ta2 .recap-title { color: var(--ta2-dark); }
+    .recap-card.ta3 .recap-title { color: var(--ta3-dark); }
+    .recap-row { display: flex; justify-content: space-between; padding: 4px 0; font-size: 13px; }
+    .recap-row .label { color: var(--text-muted); }
+    .recap-row .value { font-weight: 600; color: var(--text); }
+    .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 100; display: flex; align-items: center; justify-content: center; padding: 20px; }
+    .modal-box { background: white; border-radius: 12px; padding: 24px; max-width: 420px; width: 100%; max-height: 90vh; overflow-y: auto; }
+    .modal-box h3 { margin-bottom: 16px; font-size: 18px; }
+    .modal-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f1f5f9; font-size: 14px; }
+    .modal-row:last-child { border-bottom: none; }
+    .modal-row .label { color: var(--text-muted); margin-right: 12px; }
+    .modal-row .value { font-weight: 600; text-align: right; }
+    #status { padding: 10px 14px; border-radius: 8px; margin-top: 12px; font-size: 13px; display: none; }
+    .status-info { background: #dbeafe; color: var(--primary-dark); }
+    .status-error { background: #fee2e2; color: #991b1b; }
+    .status-success { background: #dcfce7; color: #166534; }
+    .loader { text-align: center; padding: 40px; color: var(--text-muted); font-size: 14px; }
     .hidden { display: none !important; }
-    .footer {
-      text-align: center;
-      color: #9aa0a6;
-      font-size: 12px;
-      margin-top: 30px;
+    @media (max-width: 768px) {
+      h1 { font-size: 17px; }
+      .card, .week-nav { padding: 16px; }
+      table.planning { font-size: 11px; }
+      table.planning td.slot { min-width: 70px; height: 32px; }
+      table.planning td.hour-cell { width: 48px; min-width: 48px; }
+      .header-user .email { display: none; }
     }
-  </style>
-</head>
-<body>
-
-  <header>
-    <h1>📋 Planning Atelier</h1>
-    <div class="subtitle">Narbonne Accessoires — Multi-sites</div>
-  </header>
-
-  <!-- ÉCRAN 1 : Connexion -->
-  <div id="screen-login" class="card">
-    <div class="info-box">
-      🔐 Connectez-vous avec votre compte Google pour accéder au planning de votre magasin.
-    </div>
+    <div id="screen-login" class="card hidden">
+    <h2>📋 Planning Atelier</h2>
+    <p>Narbonne Accessoires — Multi-sites</p>
     <button id="btn-login">Se connecter avec Google</button>
     <div id="status"></div>
   </div>
 
-  <!-- ÉCRAN 2 : Connecté -->
-  <div id="screen-app" class="card hidden">
-    <div class="user-info">
-      <img id="user-avatar" src="" alt="">
-      <div>
-        <div class="name" id="user-name">—</div>
-        <div class="email" id="user-email">—</div>
+  <div id="screen-app" class="hidden">
+    <header>
+      <div class="header-row">
+        <h1>📋 Planning Atelier — Aubagne</h1>
+        <div class="header-user">
+          <img id="user-avatar" src="" alt="">
+          <div>
+            <div style="font-weight:600; color:var(--text);" id="user-name">—</div>
+            <div class="email" id="user-email">—</div>
+          </div>
+          <button class="secondary compact" id="btn-logout">Déconnexion</button>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <div class="week-nav">
+        <div class="week-nav-header">
+          <div class="week-nav-title" id="month-title">—</div>
+          <div class="week-nav-arrows">
+            <button class="secondary compact" id="btn-prev-month">◀</button>
+            <button class="secondary compact" id="btn-today">Aujourd'hui</button>
+            <button class="secondary compact" id="btn-next-month">▶</button>
+          </div>
+        </div>
+        <div class="month-grid" id="month-grid"></div>
+        <div style="font-size: 12px; color: var(--text-muted); text-align:center;">
+          Cliquez sur un lundi pour afficher la semaine correspondante
+        </div>
+      </div>
+
+      <div class="planning-wrapper">
+        <div class="planning-info">
+          <span id="week-info">Aucune semaine sélectionnée</span>
+          <button class="secondary compact" id="btn-refresh">🔄 Rafraîchir</button>
+        </div>
+        <div class="planning-scroll">
+          <div id="planning-content" class="loader">Sélectionnez une semaine ↑</div>
+        </div>
+      </div>
+
+      <div id="recap-section" class="hidden">
+        <div class="recap-grid" id="recap-grid"></div>
+      </div>
+    </main>
+  </div>
+
+  <div id="modal" class="modal-overlay hidden">
+    <div class="modal-box">
+      <h3 id="modal-title">Intervention</h3>
+      <div id="modal-content"></div>
+      <div style="margin-top: 16px; text-align: right;">
+        <button class="secondary" id="btn-close-modal">Fermer</button>
       </div>
     </div>
-
-    <button id="btn-test-sheets">🧪 Tester la lecture du Sheets</button>
-    <button id="btn-logout" class="secondary">Se déconnecter</button>
-
-    <div id="sheets-output" class="hidden" style="margin-top: 20px;">
-      <h3 style="margin-bottom: 10px; font-size: 16px;">📊 Données brutes :</h3>
-      <pre id="sheets-data"></pre>
-    </div>
   </div>
 
-  <div class="footer">
-    Phase 2 — Test de connexion OAuth & lecture Sheets
-  </div>
-
-  <!-- Google Identity Services (OAuth) -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
 
-  <!-- ⚙️ CONFIGURATION — À ADAPTER ⚙️ -->
   <script>
-    // ====================================================
-    // CONFIGURATION — adapte ces valeurs avec les TIENNES
-    // ====================================================
     const CONFIG = {
       CLIENT_ID: '886061122740-vlcu74bri00qmahjat3s253ol6mun5hi.apps.googleusercontent.com',
       API_KEY: 'AIzaSyA-KBiLKtbG-S7BsyC85IWrrSEpxh5chPI',
-      // ID du Sheets Aubagne (à remplir : voir instructions plus bas)
       SHEET_ID_AUBAGNE: '1fYu37DvUt-8Sad0nZkAO0x9QNYYpTJaDnEQ2WjDS2mQ',
       SCOPES: 'https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/userinfo.email'
     };
-    // ====================================================
+    const SLOT_DURATION = 0.5;
+    const PAUSE_START = 12;
+    const PAUSE_END = 13;
+    const WORK_HOURS_START = 8;
+    const WORK_HOURS_END = 18;
+    const DAYS = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
+    const DAYS_SHORT = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
+    const COL = {
+      ID: 0, DATE: 1, ROW: 2, COL: 3,
+      CLIENT: 4, NUM_CLIENT: 5, TEL: 6,
+      FORFAIT: 7, DESIGNATION: 8,
+      TEMPS_REEL: 9, TEMPS_COMPL: 10,
+      INTERVENANT: 11, FIDELITE: 12, COMMENTAIRE: 13,
+      CA_FORFAIT: 14, PFA: 15, RECYCLAGE: 16, PRIX_NET: 17,
+      DUREE_PREVUE: 18, TEMPS_TOTAL: 19,
+      GAIN_H: 20, GAIN_E: 21,
+      KM: 22, VEHICULE: 23, IMMAT: 24,
+      FPPEC2: 25, CA_FPPEC2: 26,
+      REF_MOPA: 27, CA_TEMPS_COMPL: 28,
+      PFA_TC: 29, RECYCLAGE_TC: 30, MOPA_PFA: 31,
+      TECHNICIEN: 32
+    };
   </script>
 
   <script>
-    // État global
     let tokenClient = null;
     let accessToken = null;
     let userEmail = null;
     let userName = null;
     let userPicture = null;
-
-    // ============================================================
-    // INIT — Initialisation au chargement
-    // ============================================================
-    window.addEventListener('load', () => {
-      // Attendre que Google Identity Services soit chargé
-      const checkGoogle = setInterval(() => {
-        if (window.google && window.google.accounts) {
-          clearInterval(checkGoogle);
-          initGoogleAuth();
+    let displayedMonth = new Date();
+    displayedMonth.setDate(1);
+    let selectedMonday = null;
+    let al
+  </style>
+</head>
+<body>
+async function loadAndRender(forceReload) {
+      if (!selectedMonday) return;
+      const content = document.getElementById('planning-content');
+      content.innerHTML = '<div class="loader">⏳ Chargement du planning...</div>';
+      if (allInterventions.length === 0 || forceReload) {
+        try {
+          await fetchAllInterventions();
+        } catch (err) {
+          content.innerHTML = `<div class="loader" style="color:#991b1b;">❌ Erreur : ${err.message}</div>`;
+          return;
         }
-      }, 100);
+      }
+      renderPlanning();
+      renderRecap();
+    }
 
-      // Boutons
-      document.getElementById('btn-login').addEventListener('click', login);
-      document.getElementById('btn-logout').addEventListener('click', logout);
-      document.getElementById('btn-test-sheets').addEventListener('click', testSheets);
-    });
-
-    function initGoogleAuth() {
-      tokenClient = google.accounts.oauth2.initTokenClient({
-        client_id: CONFIG.CLIENT_ID,
-        scope: CONFIG.SCOPES,
-        callback: onAuthSuccess,
-        error_callback: onAuthError
+    async function fetchAllInterventions() {
+      const url = `https://sheets.googleapis.com/v4/spreadsheets/${CONFIG.SHEET_ID_AUBAGNE}/values/DONNEES_OK!A2:AG?valueRenderOption=UNFORMATTED_VALUE&dateTimeRenderOption=SERIAL_NUMBER`;
+      const res = await fetch(url, {
+        headers: { 'Authorization': `Bearer ${accessToken}` }
       });
-      showStatus('Prêt — cliquez pour vous connecter', 'info');
+      if (!res.ok) {
+        const errText = await res.text();
+        throw new Error(`HTTP ${res.status} : ${errText}`);
+      }
+      const data = await res.json();
+      allInterventions = data.values || [];
     }
 
-    // ============================================================
-    // LOGIN
-    // ============================================================
-    function login() {
-      if (!tokenClient) {
-        showStatus('⚠️ Google Auth non chargé. Rechargez la page.', 'error');
-        return;
-      }
-      tokenClient.requestAccessToken({ prompt: 'consent' });
+    function serialToDate(serial) {
+      if (typeof serial !== 'number') return null;
+      const baseDate = new Date(Date.UTC(1899, 11, 30));
+      const ms = serial * 86400 * 1000;
+      const d = new Date(baseDate.getTime() + ms);
+      return new Date(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
     }
 
-    async function onAuthSuccess(tokenResponse) {
-      if (!tokenResponse.access_token) {
-        showStatus('❌ Échec de l\'authentification', 'error');
-        return;
+    function renderPlanning() {
+      const weekDates = [];
+      for (let i = 0; i < 6; i++) {
+        const d = new Date(selectedMonday);
+        d.setDate(selectedMonday.getDate() + i);
+        weekDates.push(d);
       }
-      accessToken = tokenResponse.access_token;
-      showStatus('✅ Token reçu, récupération des infos utilisateur...', 'info');
-
-      // Récupérer les infos utilisateur
-      try {
-        const res = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
-          headers: { 'Authorization': `Bearer ${accessToken}` }
-        });
-        const userInfo = await res.json();
-        userEmail = userInfo.email;
-        userName = userInfo.name || userInfo.email;
-        userPicture = userInfo.picture || '';
-
-        showAppScreen();
-      } catch (err) {
-        showStatus('❌ Erreur récupération profil : ' + err.message, 'error');
+      const weekInterventions = allInterventions.filter(row => {
+        const rowDate = serialToDate(row[COL.DATE]);
+        if (!rowDate) return false;
+        return weekDates.some(d => d.getTime() === rowDate.getTime());
+      });
+      const grid = {};
+      weekInterventions.forEach(row => {
+        const rowDate = serialToDate(row[COL.DATE]);
+        const dayIdx = weekDates.findIndex(d => d.getTime() === rowDate.getTime());
+        if (dayIdx === -1) return;
+        const ta = row[COL.TECHNICIEN] || 'TA1';
+        if (!grid[dayIdx]) grid[dayIdx] = { TA1: [], TA2: [], TA3: [] };
+        if (!grid[dayIdx][ta]) grid[dayIdx][ta] = [];
+        grid[dayIdx][ta].push(row);
+      });
+      const fmt = (d) => `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}`;
+      document.getElementById('week-info').textContent =
+        `Semaine du ${fmt(weekDates[0])} au ${fmt(weekDates[5])}`;
+      const slotsCount = (WORK_HOURS_END - WORK_HOURS_START) * 2;
+      let html = '<table class="planning"><thead>';
+      html += '<tr><th class="day-header" rowspan="2">Heure</th>';
+      weekDates.forEach((d, i) => {
+        html += `<th class="day-header" colspan="3">${DAYS[i]}<br><span style="font-weight:400;font-size:11px;">${fmt(d)}</span></th>`;
+      });
+      html += '</tr><tr>';
+      for (let i = 0; i < 6; i++) {
+        html += `<th class="ta-header ta1">TA1</th><th class="ta-header ta2">TA2</th><th class="ta-header ta3">TA3</th>`;
       }
-    }
-
-    function onAuthError(err) {
-      console.error('Auth error:', err);
-      showStatus('❌ Erreur OAuth : ' + (err.message || JSON.stringify(err)), 'error');
-    }
-
-    function logout() {
-      if (accessToken) {
-        google.accounts.oauth2.revoke(accessToken);
-      }
-      accessToken = null;
-      userEmail = null;
-      userName = null;
-      document.getElementById('screen-login').classList.remove('hidden');
-      document.getElementById('screen-app').classList.add('hidden');
-      document.getElementById('sheets-output').classList.add('hidden');
-      showStatus('Déconnecté', 'info');
-    }
-
-    // ============================================================
-    // AFFICHAGE
-    // ============================================================
-    function showAppScreen() {
-      document.getElementById('screen-login').classList.add('hidden');
-      document.getElementById('screen-app').classList.remove('hidden');
-      document.getElementById('user-name').textContent = userName;
-      document.getElementById('user-email').textContent = userEmail;
-      const avatar = document.getElementById('user-avatar');
-      if (userPicture) {
-        avatar.src = userPicture;
-        avatar.style.display = 'block';
-      } else {
-        avatar.style.display = 'none';
-      }
-    }
-
-    function showStatus(msg, type) {
-      const el = document.getElementById('status');
-      el.textContent = msg;
-      el.className = `status-${type}`;
-      el.style.display = 'block';
-    }
-
-    // ============================================================
-    // TEST LECTURE SHEETS
-    // ============================================================
-    async function testSheets() {
-      if (!accessToken) {
-        alert('Pas connecté');
-        return;
-      }
-      if (CONFIG.SHEET_ID_AUBAGNE === 'A_REMPLIR_ICI') {
-        alert('⚠️ Tu dois d\'abord renseigner SHEET_ID_AUBAGNE dans le code.\n\nOuvre ton Sheets Aubagne, regarde l\'URL :\nhttps://docs.google.com/spreadsheets/d/[CET_ID_LA]/edit\n\nCopie cet ID et remplace "A_REMPLIR_ICI" dans le code.');
-        return;
-      }
-
-      const output = document.getElementById('sheets-output');
-      const dataEl = document.getElementById('sheets-data');
-      output.classList.remove('hidden');
-      dataEl.textContent = 'Chargement...';
-
-      try {
-        // Lire les 10 premières lignes de DONNEES_OK
-       const url = `https://sheets.googleapis.com/v4/spreadsheets/${CONFIG.SHEET_ID_AUBAGNE}/values/DONNEES_OK!A1:AG10`;
-        const res = await fetch(url, {
-          headers: { 'Authorization': `Bearer ${accessToken}` }
-        });
-
-        if (!res.ok) {
-          const errText = await res.text();
-          throw new Error(`HTTP ${res.status} : ${errText}`);
+      html += '</tr></thead><tbody>';
+      const occupation = {};
+      const ROW_OFFSET = 6;
+      for (let dayIdx = 0; dayIdx < 6; dayIdx++) {
+        for (const ta of ['TA1', 'TA2', 'TA3']) {
+          const interventions = (grid[dayIdx] && grid[dayIdx][ta]) || [];
+          interventions.forEach(row => {
+            const startSlot = (row[COL.ROW] || ROW_OFFSET) - ROW_OFFSET;
+            const tempsReel = Number(row[COL.TEMPS_REEL]) || 0.5;
+            const slotsNeeded = Math.ceil(tempsReel / SLOT_DURATION);
+            let placedSlots = 0;
+            let curSlot = startSlot;
+            while (placedSlots < slotsNeeded && curSlot < slotsCount) {
+              const h = WORK_HOURS_START + curSlot * 0.5;
+              if (h >= PAUSE_START && h < PAUSE_END) {
+                curSlot++;
+                continue;
+              }
+              if (!occupation[curSlot]) occupation[curSlot] = {};
+              if (!occupation[curSlot][dayIdx]) occupation[curSlot][dayIdx] = {};
+              occupation[curSlot][dayIdx][ta] = { row: row, isStart: placedSlots === 0 };
+              placedSlots++;
+              curSlot++;
+            }
+          });
         }
-
-        const data = await res.json();
-        dataEl.textContent = JSON.stringify(data, null, 2);
-      } catch (err) {
-        dataEl.textContent = '❌ Erreur : ' + err.message;
       }
+      for (let s = 0; s < slotsCount; s++) {
+        const h = WORK_HOURS_START + s * 0.5;
+        const hh = Math.floor(h);
+        const mm = (h - hh) * 60;
+        const timeLabel = `${String(hh).padStart(2,'0')}:${String(mm).padStart(2,'0')}`;
+        const isPause = (h >= PAUSE_START && h < PAUSE_END);
+        html += `<tr><td class="hour-cell">${timeLabel}</td>`;
+        for (let dayIdx = 0; dayIdx < 6; dayIdx++) {
+          for (const ta of ['TA1', 'TA2', 'TA3']) {
+            if (isPause) {
+              html += `<td class="pause">PAUSE</td>`;
+              continue;
+            }
+            const occ = occupation[s] && occupation[s][dayIdx] && occupation[s][dayIdx][ta];
+            if (occ) {
+              const r = occ.row;
+              const taClass = ta.toLowerCase();
+              const dataIdx = allInterventions.indexOf(r);
+              if (occ.isStart) {
+                const client = (r[COL.CLIENT] || '—').substring(0, 20);
+                const forfait = r[COL.FORFAIT] || '';
+                html += `<td class="occupied ${taClass}" data-idx="${dataIdx}" onclick="openInterventionModal(${dataIdx})"><span class="client">${escapeHtml(client)}</span><span class="forfait">${escapeHtml(forfait)}</span></td>`;
+              } else {
+                html += `<td class="occupied ${taClass} continuation" data-idx="${dataIdx}" onclick="openInterventionModal(${dataIdx})"></td>`;
+              }
+            } else {
+              html += `<td class="slot"></td>`;
+            }
+          }
+        }
+        html += '</tr>';
+      }
+      html += '</tbody></table>';
+      document.getElementById('planning-content').innerHTML = html;
+    }
+
+    function escapeHtml(str) {
+      if (str === null || str === undefined) return '';
+      return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    function renderRecap() {
+      const weekDates = [];
+      for (let i = 0; i < 6; i++) {
+        const d = new Date(selectedMonday);
+        d.setDate(selectedMonday.getDate() + i);
+        weekDates.push(d);
+      }
+      const weekInterventions = allInterventions.filter(row => {
+        const rowDate = serialToDate(row[COL.DATE]);
+        if (!rowDate) return false;
+        return weekDates.some(d => d.getTime() === rowDate.getTime());
+      });
+      const cumul = {
+        TOTAL: { heures: 0, ca: 0, caTC: 0, tempsPrev: 0, gainH: 0, gainE: 0 },
+        TA1: { heures: 0, ca: 0, caTC: 0, tempsPrev: 0, gainH: 0, gainE: 0 },
+        TA2: { heures: 0, ca: 0, caTC: 0, tempsPrev: 0, gainH: 0, gainE: 0 },
+        TA3: { heures: 0, ca: 0, caTC: 0, tempsPrev: 0, gainH: 0, gainE: 0 },
+      };
+      weekInterventions.forEach(r => {
+        const ta = r[COL.TECHNICIEN] || 'TA1';
+        const tempsTotal = Number(r[COL.TEMPS_TOTAL]) || 0;
+        const ca = Number(r[COL.CA_FORFAIT]) || 0;
+        const caTC = Number(r[COL.CA_TEMPS_COMPL]) || 0;
+        const tempsPrev = Number(r[COL.DUREE_PREVUE]) || 0;
+        const gainH = Number(r[COL.GAIN_H]) || 0;
+        const gainE = Number(r[COL.GAIN_E]) || 0;
+        ['TOTAL', ta].forEach(key => {
+          if (!cumul[key]) return;
+          cumul[key].heures += tempsTotal;
+          cumul[key].ca += ca;
+          cumul[key].caTC += caTC;
+          cumul[key].tempsPrev += tempsPrev;
+          cumul[key].gainH += gainH;
+          cumul[key].gainE += gainE;
+        });
+      });
+      const heuresTheoriques = 35;
+      const fmtH = (n) => n.toFixed(1).replace('.', ',') + ' h';
+      const fmtE = (n) => n.toFixed(2).replace('.', ',') + ' €';
+      const fmtP = (n) => Math.round(n) + ' %';
+      const buildCard = (title, key, taClass) => {
+        const c = cumul[key];
+        const tx = heuresTheoriques > 0 ? (c.heures / heuresTheoriques * 100) : 0;
+        return `<div class="recap-card ${taClass}"><div class="recap-title">${title}</div><div class="recap-row"><span class="label">Heures réalisées</span><span class="value">${fmtH(c.heures)}</span></div><div class="recap-row"><span class="label">CA forfait</span><span class="value">${fmtE(c.ca)}</span></div><div class="recap-row"><span class="label">CA temps compl.</span><span class="value">${fmtE(c.caTC)}</span></div><div class="recap-row"><span class="label">Temps prévu</span><span class="value">${fmtH(c.tempsPrev)}</span></div><div class="recap-row"><span class="label">Gain prod. (h)</span><span class="value">${fmtH(c.gainH)}</span></div><div class="recap-row"><span class="label">Gain prod. (€)</span><span class="value">${fmtE(c.gainE)}</span></div><div class="recap-row"><span class="label">Tx occupation</span><span class="value">${fmtP(tx)}</span></div></div>`;
+      };
+      const html = buildCard('Total semaine', 'TOTAL', 'global') +
+                   buildCard('TA1', 'TA1', 'ta1') +
+                   buildCard('TA2', 'TA2', 'ta2') +
+                   buildCard('TA3', 'TA3', 'ta3');
+      document.getElementById('recap-grid').innerHTML = html;
+      document.getElementById('recap-section').classList.remove('hidden');
+    }
+
+    function openInterventionModal(dataIdx) {
+      const r = allInterventions[dataIdx];
+      if (!r) return;
+      const fmtE = (n) => (Number(n) || 0).toFixed(2).replace('.', ',') + ' €';
+      const fmtH = (n) => (Number(n) || 0).toFixed(1).replace('.', ',') + ' h';
+      const date = serialToDate(r[COL.DATE]);
+      const dateStr = date ? `${String(date.getDate()).padStart(2,'0')}/${String(date.getMonth()+1).padStart(2,'0')}/${date.getFullYear()}` : '—';
+      const rows = [
+        ['Date', dateStr],
+        ['Client', r[COL.CLIENT] || '—'],
+        ['N° client', r[COL.NUM_CLIENT] || '—'],
+        ['Téléphone', r[COL.TEL] || '—'],
+        ['Technicien', r[COL.TECHNICIEN] || '—'],
+        ['Forfait', `${r[COL.FORFAIT] || ''} ${r[COL.DESIGNATION] ? '— ' + r[COL.DESIGNATION] : ''}`],
+        ['Intervenant', r[COL.INTERVENANT] || '—'],
+        ['Temps réel', fmtH(r[COL.TEMPS_REEL])],
+        ['Temps compl.', fmtH(r[COL.TEMPS_COMPL])],
+        ['CA forfait', fmtE(r[COL.CA_FORFAIT])],
+        ['CA temps compl.', fmtE(r[COL.CA_TEMPS_COMPL])],
+        ['Véhicule', r[COL.VEHICULE] || '—'],
+        ['Immat.', r[COL.IMMAT] || '—'],
+        ['Km', r[COL.KM] || '—'],
+        ['Carte fidélité', r[COL.FIDELITE] || '—'],
+        ['FPPEC2', r[COL.FPPEC2] || '—'],
+        ['Commentaire', r[COL.COMMENTAIRE] || '—']
+      ];
+      const html = rows.map(([k, v]) =>
+        `<div class="modal-row"><span class="label">${k}</span><span class="value">${escapeHtml(String(v))}</span></div>`
+      ).join('');
+      document.getElementById('modal-title').textContent = r[COL.CLIENT] || 'Intervention';
+      document.getElementById('modal-content').innerHTML = html;
+      document.getElementById('modal').classList.remove('hidden');
+    }
+
+    function closeModal() {
+      document.getElementById('modal').classList.add('hidden');
     }
   </script>
-
 </body>
 </html>
