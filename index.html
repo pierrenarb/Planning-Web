@@ -324,7 +324,7 @@
 
       try {
         // Lire les 10 premières lignes de DONNEES_OK
-        const url = `https://sheets.googleapis.com/v4/spreadsheets/${CONFIG.SHEET_ID_AUBAGNE}/values/DONNEES_OK!A1:AG10?key=${CONFIG.API_KEY}`;
+       const url = `https://sheets.googleapis.com/v4/spreadsheets/${CONFIG.SHEET_ID_AUBAGNE}/values/DONNEES_OK!A1:AG10`;
         const res = await fetch(url, {
           headers: { 'Authorization': `Bearer ${accessToken}` }
         });
