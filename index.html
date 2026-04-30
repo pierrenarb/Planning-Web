@@ -525,6 +525,16 @@
 
   <!-- Google Identity Services -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script>
+     // Enregistrement du Service Worker pour PWA installable
+     if ('serviceWorker' in navigator) {
+       window.addEventListener('load', () => {
+         navigator.serviceWorker.register('sw.js')
+           .then(reg => console.log('[PWA] SW enregistré:', reg.scope))
+           .catch(err => console.error('[PWA] SW erreur:', err));
+       });
+     }
+   </script>
 
   <!-- CONFIG -->
   <script>
