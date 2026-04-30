@@ -1,0 +1,32 @@
+{
+  "name": "Planning Atelier — Narbonne Accessoires",
+  "short_name": "Planning",
+  "description": "Planning multi-sites des techniciens atelier",
+  "start_url": "/Planning-Web/",
+  "scope": "/Planning-Web/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#fafbfc",
+  "theme_color": "#2563eb",
+  "lang": "fr",
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-512-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
