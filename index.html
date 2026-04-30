@@ -676,17 +676,23 @@ async function onAuthSuccess(tokenResponse) {
       console.error('Auth error:', err);
       showStatus('❌ Erreur OAuth : ' + (err.message || JSON.stringify(err)), 'error');
     }
-
-    function logout() {
-      if (accessToken) google.accounts.oauth2.revoke(accessToken);
-      accessToken = null;
-      userEmail = null;
-      allInterventions = [];
-      document.getElementById('screen-login').classList.remove('hidden');
-      document.getElementById('screen-app').classList.add('hidden');
-      showStatus('Déconnecté', 'info');
-    }
-
+function logout() {
+  if (accessToken) google.accounts.oauth2.revoke(accessToken);
+  accessToken = null;
+  userEmail = null;
+  allInterventions = [];
+  
+  // Annuler le timer de renouvellement
+  if (window.tokenRefreshTimer) clearTimeout(window.tokenRefreshTimer);
+  
+  // Effacer le flag de mémorisation pour que la prochaine fois on redemande la popup
+  localStorage.removeItem('hasLoggedInBefore');
+  
+  document.getElementById('screen-login').classList.remove('hidden');
+  document.getElementById('screen-app').classList.add('hidden');
+  showStatus('Déconnecté', 'info');
+}
+    
     function showAppScreen() {
       document.getElementById('screen-login').classList.add('hidden');
       document.getElementById('screen-app').classList.remove('hidden');
