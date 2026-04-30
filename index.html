@@ -637,31 +637,40 @@
   // Si silent=false : popup avec choix de compte
   tokenClient.requestAccessToken({ prompt: silent ? '' : 'consent' });
 }
-
-    async function onAuthSuccess(tokenResponse) {
-      if (!tokenResponse.access_token) {
-        showStatus('❌ Échec de l\'authentification', 'error');
-        return;
-      }
-      accessToken = tokenResponse.access_token;
-
-      try {
-        const res = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
-          headers: { 'Authorization': `Bearer ${accessToken}` }
-        });
-        const userInfo = await res.json();
-        userEmail = userInfo.email;
-        userName = userInfo.name || userInfo.email;
-        userPicture = userInfo.picture || '';
-
-        showAppScreen();
-        renderMonthCalendar();
-        // Pré-sélectionner la semaine actuelle
-        goToToday();
-      } catch (err) {
-        showStatus('❌ Erreur récupération profil : ' + err.message, 'error');
-      }
+async function onAuthSuccess(tokenResponse) {
+  if (!tokenResponse.access_token) {
+    showStatus('❌ Échec de l\'authentification', 'error');
+    return;
+  }
+  accessToken = tokenResponse.access_token;
+  
+  // Mémoriser que l'utilisateur s'est connecté avec succès
+  localStorage.setItem('hasLoggedInBefore', 'true');
+  
+  // Programmer le renouvellement automatique du token (avant expiration ~55 min)
+  if (window.tokenRefreshTimer) clearTimeout(window.tokenRefreshTimer);
+  window.tokenRefreshTimer = setTimeout(() => {
+    if (localStorage.getItem('hasLoggedInBefore') === 'true') {
+      login(true);  // renouvellement silencieux
     }
+  }, 55 * 60 * 1000);  // 55 minutes
+  
+  try {
+    const res = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+      headers: { 'Authorization': `Bearer ${accessToken}` }
+    });
+    const userInfo = await res.json();
+    userEmail = userInfo.email;
+    userName = userInfo.name || userInfo.email;
+    userPicture = userInfo.picture || '';
+    showAppScreen();
+    renderMonthCalendar();
+    goToToday();
+  } catch (err) {
+    showStatus('❌ Erreur récupération profil : ' + err.message, 'error');
+  }
+}
+   
 
     function onAuthError(err) {
       console.error('Auth error:', err);
