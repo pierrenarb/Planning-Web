@@ -602,15 +602,31 @@
     // =====================================================
     // AUTH
     // =====================================================
-    function initGoogleAuth() {
-      tokenClient = google.accounts.oauth2.initTokenClient({
-        client_id: CONFIG.CLIENT_ID,
-        scope: CONFIG.SCOPES,
-        callback: onAuthSuccess,
-        error_callback: onAuthError
-      });
-      showStatus('Prêt — cliquez pour vous connecter', 'info');
-    }
+  function initGoogleAuth() {
+  tokenClient = google.accounts.oauth2.initTokenClient({
+    client_id: CONFIG.CLIENT_ID,
+    scope: CONFIG.SCOPES,
+    callback: onAuthSuccess,
+    error_callback: onAuthError
+  });
+  
+  // Tentative de reconnexion silencieuse si l'utilisateur s'est déjà connecté
+  if (localStorage.getItem('hasLoggedInBefore') === 'true') {
+    showStatus('Reconnexion en cours...', 'info');
+    login(true);  // silent = true
+  } else {
+    showStatus('Prêt — cliquez pour vous connecter', 'info');
+  }
+}
+  
+  // Tentative de reconnexion silencieuse si l'utilisateur s'est déjà connecté
+  if (localStorage.getItem('hasLoggedInBefore') === 'true') {
+    showStatus('Reconnexion en cours...', 'info');
+    login(true);  // silent = true
+  } else {
+    showStatus('Prêt — cliquez pour vous connecter', 'info');
+  }
+}
 
    function login(silent) {
   if (!tokenClient) {
