@@ -612,13 +612,15 @@
       showStatus('Prêt — cliquez pour vous connecter', 'info');
     }
 
-    function login() {
-      if (!tokenClient) {
-        showStatus('⚠️ Google Auth non chargé. Rechargez la page.', 'error');
-        return;
-      }
-      tokenClient.requestAccessToken({ prompt: 'consent' });
-    }
+   function login(silent) {
+  if (!tokenClient) {
+    showStatus('⚠️ Google Auth non chargé. Rechargez la page.', 'error');
+    return;
+  }
+  // Si silent=true : tente reconnexion sans popup (utilise la session Google existante)
+  // Si silent=false : popup avec choix de compte
+  tokenClient.requestAccessToken({ prompt: silent ? '' : 'consent' });
+}
 
     async function onAuthSuccess(tokenResponse) {
       if (!tokenResponse.access_token) {
