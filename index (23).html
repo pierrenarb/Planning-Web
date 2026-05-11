@@ -1,0 +1,3839 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Planning Atelier — Narbonne Accessoires</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#2563eb">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, sans-serif; background: #fafbfc; color: #1a1a1a; min-height: 100vh; -webkit-font-smoothing: antialiased; }
+    :root {
+      --ta1-bg: #DCEEFB; --ta1-border: #5BA3D0; --ta1-dark: #2C5F7C;
+      --ta2-bg: #FCE8D4; --ta2-border: #E89D5C; --ta2-dark: #8B4F1F;
+      --ta3-bg: #DCEDDC; --ta3-border: #6FA76F; --ta3-dark: #3A6B3A;
+      --primary: #2563eb; --primary-dark: #1e40af;
+      --bg-card: #ffffff; --bg-empty: #f8fafc;
+      --border: #e2e8f0; --text: #1e293b; --text-muted: #64748b;
+      --pause-bg: #f1f5f9;
+    }
+    header { background: white; border-bottom: 1px solid var(--border); padding: 16px 20px; position: sticky; top: 0; z-index: 50; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+    .header-row { display: flex; justify-content: space-between; align-items: center; max-width: 1400px; margin: 0 auto; gap: 16px; flex-wrap: wrap; }
+    h1 { font-size: 20px; font-weight: 700; color: var(--primary-dark); }
+    .header-user { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--text-muted); }
+    .header-user img { width: 32px; height: 32px; border-radius: 50%; }
+    main { max-width: 1400px; margin: 0 auto; padding: 20px; }
+    .card { background: var(--bg-card); border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); padding: 24px; margin-bottom: 16px; border: 1px solid var(--border); }
+    button { background: var(--primary); color: white; border: none; padding: 10px 18px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.15s; }
+    button:hover { background: var(--primary-dark); }
+    button:disabled { background: #cbd5e1; cursor: not-allowed; }
+    button.secondary { background: white; color: var(--primary); border: 1px solid var(--border); }
+    button.secondary:hover { background: #f1f5f9; }
+    button.compact { padding: 6px 12px; font-size: 13px; }
+    button.danger { background: #dc2626; }
+    button.danger:hover { background: #991b1b; }
+    #screen-login { max-width: 440px; margin: 60px auto; text-align: center; }
+    #screen-login h2 { font-size: 22px; margin-bottom: 8px; }
+    #screen-login p { color: var(--text-muted); margin-bottom: 24px; font-size: 15px; }
+    #btn-login { width: 100%; padding: 14px; font-size: 15px; }
+    .week-nav { background: white; border-radius: 12px; padding: 20px; margin-bottom: 16px; border: 1px solid var(--border); }
+    .week-nav-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+    .week-nav-title { font-size: 15px; font-weight: 600; color: var(--text); }
+    .week-nav-arrows { display: flex; gap: 8px; }
+    .month-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-bottom: 12px; }
+    .month-grid-header { text-align: center; font-size: 11px; font-weight: 600; color: var(--text-muted); padding: 4px 0; text-transform: uppercase; }
+    .day-cell { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-size: 13px; border-radius: 6px; cursor: pointer; transition: all 0.15s; color: var(--text); position: relative; }
+    .day-cell:hover { background: #f1f5f9; }
+    .day-cell.other-month { color: #cbd5e1; cursor: default; }
+    .day-cell.other-month:hover { background: transparent; }
+    .day-cell.in-week-selected { background: var(--ta1-bg); color: var(--ta1-dark); font-weight: 600; }
+    .day-cell.is-monday-selectable { cursor: pointer; font-weight: 600; }
+    .day-cell.today { box-shadow: inset 0 0 0 2px var(--primary); font-weight: 700; }
+    .planning-wrapper { background: white; border-radius: 12px; border: 1px solid var(--border); overflow: hidden; }
+    .planning-info { padding: 14px 20px; background: #f8fafc; border-bottom: 1px solid var(--border); font-size: 14px; font-weight: 600; color: var(--text); display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .planning-info-actions { display: flex; gap: 8px; }
+    .planning-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    table.planning { border-collapse: collapse; width: 100%; min-width: 900px; font-size: 12px; }
+    table.planning th, table.planning td { border: 1px solid #e2e8f0; padding: 0; vertical-align: top; text-align: center; }
+    table.planning thead .day-header { background: #f1f5f9; font-weight: 700; padding: 8px 4px; font-size: 12px; color: var(--text); border-bottom: 2px solid #cbd5e1; }
+    table.planning thead .ta-header { padding: 6px 4px; font-weight: 600; font-size: 11px; }
+    .ta-header.ta1 { background: var(--ta1-bg); color: var(--ta1-dark); }
+    .ta-header.ta2 { background: var(--ta2-bg); color: var(--ta2-dark); }
+    .ta-header.ta3 { background: var(--ta3-bg); color: var(--ta3-dark); }
+    table.planning td.hour-cell { background: #f8fafc; color: var(--text-muted); font-weight: 600; font-size: 11px; padding: 4px 6px; width: 60px; min-width: 60px; white-space: nowrap; }
+    table.planning td.slot { background: var(--bg-empty); height: 36px; min-width: 90px; padding: 2px 4px; cursor: pointer; transition: background 0.15s; position: relative; }
+    table.planning td.slot:hover { background: #ddeefe; }
+    table.planning td.slot:hover::after { content: '+'; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: var(--primary); font-weight: 700; font-size: 18px; opacity: 0.7; }
+    table.planning td.pause { background: var(--pause-bg); cursor: default; color: var(--text-muted); font-style: italic; font-size: 10px; }
+    table.planning td.pause:hover { background: var(--pause-bg); }
+    table.planning td.ferie { background: repeating-linear-gradient(45deg, #fee2e2, #fee2e2 6px, #fecaca 6px, #fecaca 12px); cursor: not-allowed; color: #991b1b; font-style: italic; font-size: 10px; font-weight: 600; }
+    table.planning td.ferie:hover { background: repeating-linear-gradient(45deg, #fee2e2, #fee2e2 6px, #fecaca 6px, #fecaca 12px); }
+    table.planning thead .day-header.ferie-header { background: #fee2e2; color: #991b1b; }
+    table.planning thead .day-header.ferie-header::after { content: ' 🚫'; }
+    table.planning td.occupied { cursor: pointer; padding: 4px 6px; font-size: 11px; line-height: 1.3; text-align: left; }
+    table.planning td.occupied.ta1 { background: var(--ta1-bg); color: var(--ta1-dark); border-left: 3px solid var(--ta1-border); }
+    table.planning td.occupied.ta2 { background: var(--ta2-bg); color: var(--ta2-dark); border-left: 3px solid var(--ta2-border); }
+    table.planning td.occupied.ta3 { background: var(--ta3-bg); color: var(--ta3-dark); border-left: 3px solid var(--ta3-border); }
+    table.planning td.occupied .client { font-weight: 700; display: block; }
+    table.planning td.occupied .forfait { font-size: 10px; opacity: 0.85; display: block; }
+    table.planning td.continuation { cursor: pointer; }
+    .recap-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-top: 16px; }
+    .recap-card { background: white; border-radius: 10px; padding: 16px; border: 1px solid var(--border); border-left-width: 4px; }
+    .recap-card.ta1 { border-left-color: var(--ta1-border); }
+    .recap-card.ta2 { border-left-color: var(--ta2-border); }
+    .recap-card.ta3 { border-left-color: var(--ta3-border); }
+    .recap-card.global { border-left-color: var(--primary); }
+    .recap-title { font-size: 12px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 12px; letter-spacing: 0.5px; }
+    .recap-card.ta1 .recap-title { color: var(--ta1-dark); }
+    .recap-card.ta2 .recap-title { color: var(--ta2-dark); }
+    .recap-card.ta3 .recap-title { color: var(--ta3-dark); }
+    .recap-row { display: flex; justify-content: space-between; padding: 4px 0; font-size: 13px; }
+    .recap-row .label { color: var(--text-muted); }
+    .recap-row .value { font-weight: 600; color: var(--text); }
+    .recap-row-edit { align-items: center; }
+    .recap-heures-input { width: 70px; padding: 3px 6px; border: 1px solid var(--border); border-radius: 4px; font-size: 13px; font-weight: 600; text-align: right; background: white; color: var(--text); font-family: inherit; }
+    .recap-heures-input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15); }
+    .recap-heures-input:hover { border-color: var(--primary); }
+    .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 100; display: flex; align-items: center; justify-content: center; padding: 20px; }
+    .modal-box { background: white; border-radius: 12px; padding: 24px; max-width: 520px; width: 100%; max-height: 90vh; overflow-y: auto; }
+    .modal-box h3 { margin-bottom: 16px; font-size: 18px; }
+    .modal-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f1f5f9; font-size: 14px; }
+    .modal-row:last-child { border-bottom: none; }
+    .modal-row .label { color: var(--text-muted); margin-right: 12px; }
+    .modal-row .value { font-weight: 600; text-align: right; }
+    .form-section { margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid #f1f5f9; }
+    .form-section:last-of-type { border-bottom: none; }
+    .form-section-title { font-size: 12px; font-weight: 700; text-transform: uppercase; color: var(--primary-dark); margin-bottom: 12px; letter-spacing: 0.5px; cursor: pointer; user-select: none; display: flex; align-items: center; gap: 6px; }
+    .form-section-title .toggle-icon { transition: transform 0.2s; }
+    .form-section-title.collapsed .toggle-icon { transform: rotate(-90deg); }
+    .form-section-content { display: block; }
+    .form-section-content.collapsed { display: none; }
+    .form-row { display: flex; flex-direction: column; gap: 4px; margin-bottom: 12px; }
+    .form-row.cols-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .form-row label { font-size: 12px; font-weight: 600; color: var(--text); }
+    .form-row label.required::after { content: ' *'; color: #dc2626; }
+    .form-row input, .form-row select, .form-row textarea { padding: 8px 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 14px; font-family: inherit; background: white; }
+    .form-row input:focus, .form-row select:focus, .form-row textarea:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15); }
+    .form-row .field-hint { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+    .form-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px; padding-top: 12px; border-top: 1px solid #f1f5f9; flex-wrap: wrap; }
+    .form-actions button { font-size: 13px; padding: 8px 14px; }
+    .form-feedback { padding: 10px 14px; border-radius: 6px; font-size: 13px; margin-top: 12px; display: none; }
+    .form-feedback.error { background: #fee2e2; color: #991b1b; display: block; }
+    .form-feedback.success { background: #dcfce7; color: #166534; display: block; }
+    .form-feedback.info { background: #dbeafe; color: var(--primary-dark); display: block; }
+    #status { padding: 10px 14px; border-radius: 8px; margin-top: 12px; font-size: 13px; display: none; }
+    .status-info { background: #dbeafe; color: var(--primary-dark); }
+    .status-error { background: #fee2e2; color: #991b1b; }
+    .status-success { background: #dcfce7; color: #166534; }
+    .loader { text-align: center; padding: 40px; color: var(--text-muted); font-size: 14px; }
+    .site-button { padding: 14px 16px; background: white; border: 2px solid var(--border); border-radius: 10px; cursor: pointer; font-size: 15px; font-weight: 600; color: var(--text); text-align: left; transition: all 0.15s; display: flex; align-items: center; gap: 12px; }
+    .site-button:hover { background: var(--ta1-bg); border-color: var(--ta1-border); transform: translateX(4px); }
+    .site-button .site-icon { font-size: 20px; }
+
+    /* Barre de recherche */
+    .search-bar { background: white; border-radius: 12px; padding: 14px 16px; margin-bottom: 16px; border: 1px solid var(--border); }
+    .search-input-wrapper { display: flex; align-items: center; gap: 10px; background: #f8fafc; border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; transition: all 0.15s; }
+    .search-input-wrapper:focus-within { background: white; border-color: var(--primary); box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15); }
+    .search-icon { font-size: 16px; color: var(--text-muted); }
+    .search-input-wrapper input { flex: 1; border: none; background: transparent; font-size: 15px; outline: none; font-family: inherit; color: var(--text); }
+    .search-clear { background: var(--text-muted); color: white; border: none; border-radius: 50%; width: 24px; height: 24px; padding: 0; font-size: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+    .search-clear:hover { background: var(--text); }
+
+    /* Résultats de recherche */
+    .search-results { background: white; border-radius: 12px; border: 1px solid var(--border); margin-bottom: 16px; overflow: hidden; }
+    .search-results-header { padding: 14px 18px; background: #f1f5f9; border-bottom: 1px solid var(--border); font-size: 14px; font-weight: 600; color: var(--text); display: flex; justify-content: space-between; align-items: center; }
+    .search-results-list { max-height: 480px; overflow-y: auto; }
+    .search-result-item { padding: 14px 18px; border-bottom: 1px solid #f1f5f9; cursor: pointer; transition: background 0.1s; display: flex; gap: 12px; align-items: flex-start; }
+    .search-result-item:hover { background: #f1f5f9; }
+    .search-result-item:last-child { border-bottom: none; }
+    .search-result-ta { flex-shrink: 0; padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; }
+    .search-result-ta.ta1 { background: var(--ta1-bg); color: var(--ta1-dark); }
+    .search-result-ta.ta2 { background: var(--ta2-bg); color: var(--ta2-dark); }
+    .search-result-ta.ta3 { background: var(--ta3-bg); color: var(--ta3-dark); }
+    .search-result-content { flex: 1; min-width: 0; }
+    .search-result-name { font-weight: 700; font-size: 14px; color: var(--text); margin-bottom: 4px; }
+    .search-result-details { font-size: 12px; color: var(--text-muted); display: flex; gap: 12px; flex-wrap: wrap; }
+    .search-result-details span { white-space: nowrap; }
+    .search-result-empty { padding: 30px 20px; text-align: center; color: var(--text-muted); font-size: 14px; }
+
+    /* Stats mensuelles */
+    .stats-current-month { background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); color: white; border-radius: 12px; padding: 20px; }
+    .stats-current-month h4 { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px; opacity: 0.85; margin-bottom: 8px; }
+    .stats-current-month .month-name { font-size: 22px; font-weight: 700; margin-bottom: 16px; }
+    .stats-current-month .stats-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+    .stats-current-month .stat-item { background: rgba(255, 255, 255, 0.15); padding: 10px 12px; border-radius: 8px; }
+    .stats-current-month .stat-label { font-size: 11px; opacity: 0.9; text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 4px; }
+    .stats-current-month .stat-value { font-size: 18px; font-weight: 700; }
+
+    .stats-chart-tabs { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 8px; }
+    .stats-tab { background: white; color: var(--text-muted); border: 1px solid var(--border); padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.15s; }
+    .stats-tab:hover { background: #f1f5f9; }
+    .stats-tab.active { background: var(--primary); color: white; border-color: var(--primary); }
+
+    .stats-table-wrapper { overflow-x: auto; }
+    .stats-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .stats-table th { background: #f1f5f9; padding: 8px 10px; font-weight: 700; color: var(--text); text-align: left; border-bottom: 1px solid var(--border); white-space: nowrap; }
+    .stats-table td { padding: 8px 10px; border-bottom: 1px solid #f1f5f9; white-space: nowrap; }
+    .stats-table tbody tr:hover { background: #f8fafc; }
+    .stats-table tbody tr.current-month { background: #dbeafe; font-weight: 600; }
+    .stats-table tbody tr.current-month:hover { background: #bfdbfe; }
+    .stats-table .num { text-align: right; font-variant-numeric: tabular-nums; }
+
+    /* Fil rouge */
+    .filrouge-section { background: white; border-radius: 12px; border: 1px solid var(--border); margin-top: 16px; overflow: hidden; }
+    .filrouge-header { padding: 12px 18px; background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%); color: white; font-size: 14px; font-weight: 700; display: flex; justify-content: space-between; align-items: center; }
+    .filrouge-count { font-size: 12px; opacity: 0.9; font-weight: 500; }
+    .filrouge-list { padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+    .filrouge-item { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; transition: background 0.15s; }
+    .filrouge-item:hover { background: #f8fafc; }
+    .filrouge-color-dot { flex-shrink: 0; width: 14px; height: 14px; border-radius: 50%; border: 2px solid white; box-shadow: 0 0 0 1px var(--border); }
+    .filrouge-content { flex: 1; min-width: 0; }
+    .filrouge-name { font-weight: 600; font-size: 14px; color: var(--text); margin-bottom: 2px; }
+    .filrouge-meta { font-size: 12px; color: var(--text-muted); display: flex; gap: 12px; flex-wrap: wrap; }
+    .filrouge-actions { display: flex; gap: 6px; flex-shrink: 0; }
+    .filrouge-actions button { padding: 6px 10px; font-size: 12px; }
+
+    /* Urgence */
+    .urgence-section { background: white; border-radius: 12px; border: 1px solid var(--border); margin-top: 16px; overflow: hidden; }
+    .urgence-header { padding: 12px 18px; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; font-size: 14px; font-weight: 700; display: flex; justify-content: space-between; align-items: center; }
+    .urgence-count { font-size: 12px; opacity: 0.9; font-weight: 500; }
+    .urgence-list { padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+    .urgence-item { display: flex; align-items: flex-start; gap: 12px; padding: 12px; border: 1px solid var(--border); border-radius: 8px; transition: background 0.15s; }
+    .urgence-item:hover { background: #fef3c7; }
+    .urgence-day { flex-shrink: 0; padding: 6px 10px; background: #fef3c7; color: #92400e; font-weight: 700; font-size: 11px; border-radius: 6px; min-width: 60px; text-align: center; }
+    .urgence-ta-badge { flex-shrink: 0; padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; }
+    .urgence-ta-badge.ta1 { background: var(--ta1-bg); color: var(--ta1-dark); }
+    .urgence-ta-badge.ta2 { background: var(--ta2-bg); color: var(--ta2-dark); }
+    .urgence-ta-badge.ta3 { background: var(--ta3-bg); color: var(--ta3-dark); }
+    .urgence-content { flex: 1; min-width: 0; }
+    .urgence-name { font-weight: 700; font-size: 14px; color: var(--text); margin-bottom: 4px; }
+    .urgence-detail { font-size: 12px; color: var(--text-muted); display: flex; gap: 12px; flex-wrap: wrap; }
+    .urgence-actions { display: flex; gap: 6px; flex-shrink: 0; flex-wrap: wrap; }
+    .urgence-actions button { padding: 6px 10px; font-size: 12px; }
+
+    /* Historique client */
+    .history-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; padding: 14px; background: linear-gradient(135deg, var(--ta1-bg) 0%, #B8DDF5 100%); border-radius: 10px; margin-bottom: 8px; }
+    .history-stat-item { background: rgba(255, 255, 255, 0.7); padding: 10px; border-radius: 8px; }
+    .history-stat-label { font-size: 11px; color: var(--ta1-dark); text-transform: uppercase; letter-spacing: 0.4px; font-weight: 600; margin-bottom: 4px; }
+    .history-stat-value { font-size: 17px; font-weight: 700; color: var(--ta1-dark); }
+    .history-list { max-height: 400px; overflow-y: auto; border: 1px solid var(--border); border-radius: 8px; }
+    .history-item { padding: 12px 14px; border-bottom: 1px solid #f1f5f9; cursor: pointer; transition: background 0.15s; display: flex; gap: 12px; align-items: flex-start; }
+    .history-item:hover { background: #f8fafc; }
+    .history-item:last-child { border-bottom: none; }
+    .history-item.upcoming { background: #fef9c3; }
+    .history-item.upcoming:hover { background: #fef08a; }
+    .history-date { flex-shrink: 0; width: 80px; text-align: center; }
+    .history-date .day { font-size: 22px; font-weight: 700; color: var(--text); line-height: 1; }
+    .history-date .month-year { font-size: 11px; color: var(--text-muted); text-transform: uppercase; margin-top: 2px; }
+    .history-content { flex: 1; min-width: 0; }
+    .history-forfait { font-weight: 600; font-size: 14px; color: var(--text); margin-bottom: 4px; }
+    .history-details { font-size: 12px; color: var(--text-muted); display: flex; gap: 12px; flex-wrap: wrap; }
+    .history-amount { flex-shrink: 0; text-align: right; font-weight: 700; color: var(--primary-dark); font-size: 14px; }
+    .history-empty { padding: 30px 20px; text-align: center; color: var(--text-muted); font-size: 14px; }
+
+    /* Temps complémentaire */
+    .tc-box { background: #fef3c7; border: 1px solid #fcd34d; border-radius: 10px; padding: 14px; margin-bottom: 16px; }
+    .tc-header { font-weight: 700; font-size: 14px; color: #92400e; margin-bottom: 12px; }
+    .tc-optional { font-weight: 400; opacity: 0.8; font-size: 12px; }
+    .tc-summary { margin-top: 10px; padding: 10px 12px; background: white; border-radius: 8px; font-size: 13px; color: var(--text); border-left: 3px solid #f59e0b; }
+    .tc-summary.empty { color: var(--text-muted); font-style: italic; border-left-color: #cbd5e1; }
+    .tc-summary.active { color: #065f46; border-left-color: #10b981; background: #d1fae5; }
+    .tc-summary .tc-amount { font-weight: 700; font-size: 15px; }
+    .tc-summary .tc-detail { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+
+    .hidden { display: none !important; }
+    @media (max-width: 768px) {
+      h1 { font-size: 17px; }
+      .card, .week-nav { padding: 16px; }
+      table.planning { font-size: 11px; }
+      table.planning td.slot { min-width: 70px; height: 32px; }
+      table.planning td.hour-cell { width: 48px; min-width: 48px; }
+      .header-user .email { display: none; }
+      .form-row.cols-2 { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <div id="screen-login" class="card hidden">
+    <h2>📋 Planning Atelier</h2>
+    <p>Narbonne Accessoires — Multi-sites</p>
+    <button id="btn-login">Se connecter avec Google</button>
+    <div id="status"></div>
+  </div>
+
+  <div id="screen-app" class="hidden">
+    <header>
+      <div class="header-row">
+        <h1>📋 Planning Atelier — <span id="header-site-name">—</span></h1>
+        <select id="site-switcher" class="hidden" style="padding: 6px 10px; border-radius: 6px; border: 1px solid var(--border); font-size: 13px; font-weight: 600; background: white; color: var(--primary-dark);"></select>
+        <div class="header-user">
+          <img id="user-avatar" src="" alt="">
+          <div>
+            <div style="font-weight:600; color:var(--text);" id="user-name">—</div>
+            <div class="email" id="user-email">—</div>
+          </div>
+          <button class="secondary compact" id="btn-logout">Déconnexion</button>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <!-- BARRE DE RECHERCHE CLIENT -->
+      <div class="search-bar">
+        <div class="search-input-wrapper">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="search-input" placeholder="Rechercher un client..." autocomplete="off">
+          <button class="search-clear hidden" id="search-clear" title="Effacer">✕</button>
+        </div>
+      </div>
+
+      <!-- RÉSULTATS DE RECHERCHE -->
+      <div id="search-results" class="search-results hidden">
+        <div class="search-results-header">
+          <span id="search-results-count">0 résultat</span>
+          <button class="secondary compact" id="search-close">Fermer</button>
+        </div>
+        <div id="search-results-list" class="search-results-list"></div>
+      </div>
+
+      <div class="week-nav">
+        <div class="week-nav-header">
+          <div class="week-nav-title" id="month-title">—</div>
+          <div class="week-nav-arrows">
+            <button class="secondary compact" id="btn-prev-month">◀</button>
+            <button class="secondary compact" id="btn-today">Aujourd'hui</button>
+            <button class="secondary compact" id="btn-next-month">▶</button>
+          </div>
+        </div>
+        <div class="month-grid" id="month-grid"></div>
+        <div style="font-size: 12px; color: var(--text-muted); text-align:center;">
+          Cliquez sur un lundi pour afficher la semaine correspondante
+        </div>
+      </div>
+
+      <div class="planning-wrapper">
+        <div class="planning-info">
+          <span id="week-info">Aucune semaine sélectionnée</span>
+          <div class="planning-info-actions">
+            <select class="compact" id="view-mode-select" style="padding: 6px 8px; border-radius: 6px; border: 1px solid var(--border); font-size: 13px; font-weight: 600;">
+              <option value="week">📅 Vue Semaine</option>
+              <option value="day">📆 Vue Jour</option>
+            </select>
+            <select class="compact hidden" id="view-day-select" style="padding: 6px 8px; border-radius: 6px; border: 1px solid var(--border); font-size: 13px; font-weight: 600;"></select>
+            <button class="compact" id="btn-add-quick">➕ Ajouter</button>
+            <button class="compact" id="btn-add-filrouge" style="background: #dc2626;">🧵 Fil rouge</button>
+            <button class="compact" id="btn-add-urgence" style="background: #f59e0b;">⚡ Urgence</button>
+            <button class="secondary compact" id="btn-stats">📊 Stats</button>
+            <button class="secondary compact" id="btn-refresh">🔄 Rafraîchir</button>
+          </div>
+        </div>
+        <div class="planning-scroll">
+          <div id="planning-content" class="loader">Sélectionnez une semaine ↑</div>
+        </div>
+      </div>
+
+      <!-- URGENCES DE LA SEMAINE -->
+      <div id="urgence-section" class="urgence-section hidden">
+        <div class="urgence-header">
+          <span>⚡ Urgences de la semaine</span>
+          <span class="urgence-count" id="urgence-count"></span>
+        </div>
+        <div class="urgence-list" id="urgence-list"></div>
+      </div>
+
+      <!-- FIL ROUGE DE LA SEMAINE -->
+      <div id="filrouge-section" class="filrouge-section hidden">
+        <div class="filrouge-header">
+          <span>🧵 Fil rouge de la semaine</span>
+          <span class="filrouge-count" id="filrouge-count"></span>
+        </div>
+        <div class="filrouge-list" id="filrouge-list"></div>
+      </div>
+
+      <div id="recap-section" class="hidden">
+        <div class="recap-grid" id="recap-grid"></div>
+      </div>
+    </main>
+  </div>
+
+  <!-- MODALE CHOIX DU SITE -->
+  <div id="site-modal" class="modal-overlay hidden">
+    <div class="modal-box" style="max-width: 480px;">
+      <h3 style="margin-bottom: 8px;">🏢 Sélection du magasin</h3>
+      <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 20px;">Choisissez le magasin que vous souhaitez consulter :</p>
+      <div id="site-list" style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px;"></div>
+      <div id="site-modal-no-access" class="hidden" style="padding: 16px; background: #fee2e2; color: #991b1b; border-radius: 8px; font-size: 14px;">
+        ⚠️ Votre compte n'a accès à aucun magasin.<br>
+        Contactez l'administrateur pour obtenir les permissions.
+      </div>
+    </div>
+  </div>
+
+  <!-- MODALE URGENCE (ajout/édition) -->
+  <div id="urgence-modal" class="modal-overlay hidden">
+    <div class="modal-box" style="max-width: 520px;">
+      <h3 id="urgence-modal-title">⚡ Nouvelle urgence</h3>
+      <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 16px;">
+        Intervention sans créneau horaire fixe — placée en parallèle de l'agenda du TA.
+      </p>
+
+      <div class="form-row cols-2">
+        <div class="form-row">
+          <label class="required" for="urg-jour">Jour</label>
+          <select id="urg-jour"></select>
+        </div>
+        <div class="form-row">
+          <label class="required" for="urg-ta">Technicien</label>
+          <select id="urg-ta">
+            <option value="TA1">TA1</option>
+            <option value="TA2">TA2</option>
+            <option value="TA3">TA3</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <label class="required" for="urg-forfait">Forfait</label>
+        <select id="urg-forfait"><option value="">— Choisir un forfait —</option></select>
+        <div class="field-hint" id="urg-forfait-info">Prix : — • Durée : —</div>
+      </div>
+
+      <div class="form-row">
+        <label class="required" for="urg-client">Client</label>
+        <input type="text" id="urg-client" placeholder="Ex: GARCIA Laurent">
+      </div>
+
+      <div class="form-row cols-2">
+        <div class="form-row">
+          <label for="urg-tel">Téléphone</label>
+          <input type="text" id="urg-tel">
+        </div>
+        <div class="form-row">
+          <label for="urg-email">📧 Email</label>
+          <input type="email" id="urg-email">
+        </div>
+      </div>
+
+      <div class="form-row cols-2">
+        <div class="form-row">
+          <label for="urg-vehicule">Véhicule</label>
+          <input type="text" id="urg-vehicule">
+        </div>
+        <div class="form-row">
+          <label for="urg-immat">Immatriculation</label>
+          <input type="text" id="urg-immat">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <label for="urg-commentaire">Commentaire</label>
+        <textarea id="urg-commentaire" rows="2"></textarea>
+      </div>
+
+      <div id="urgence-feedback" class="form-feedback"></div>
+
+      <div class="form-actions">
+        <button class="secondary" id="btn-cancel-urgence">Annuler</button>
+        <button id="btn-submit-urgence">✅ Valider</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODALE FIL ROUGE (ajout/édition) -->
+  <div id="filrouge-modal" class="modal-overlay hidden">
+    <div class="modal-box" style="max-width: 480px;">
+      <h3 id="filrouge-modal-title">🧵 Nouveau fil rouge</h3>
+      <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 16px;">
+        Intervention sans créneau horaire — sera placée dans la zone fil rouge de la semaine.
+      </p>
+
+      <div class="form-row">
+        <label class="required" for="fr-name">Nom / Description</label>
+        <input type="text" id="fr-name" placeholder="Ex: Pose attelage Mr Dupont">
+      </div>
+
+      <div class="form-row cols-2">
+        <div class="form-row">
+          <label class="required" for="fr-duree">Durée (h)</label>
+          <input type="number" id="fr-duree" step="0.5" min="0.5" placeholder="Ex: 2.5">
+        </div>
+        <div class="form-row">
+          <label for="fr-ca">CA (€)</label>
+          <input type="number" id="fr-ca" step="0.01" min="0" placeholder="Ex: 145.00">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <label for="fr-couleur">Couleur</label>
+        <select id="fr-couleur">
+          <option value="ROUGE">🔴 Rouge</option>
+          <option value="JAUNE">🟡 Jaune</option>
+          <option value="VERT">🟢 Vert</option>
+          <option value="ORANGE">🟠 Orange</option>
+          <option value="BLEU">🔵 Bleu</option>
+          <option value="GRIS">⚪ Gris</option>
+        </select>
+      </div>
+
+      <div id="filrouge-feedback" class="form-feedback"></div>
+
+      <div class="form-actions">
+        <button class="secondary" id="btn-cancel-filrouge">Annuler</button>
+        <button id="btn-submit-filrouge">✅ Valider</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODALE STATS MENSUELLES -->
+  <div id="stats-modal" class="modal-overlay hidden">
+    <div class="modal-box" style="max-width: 720px;">
+      <h3 style="margin-bottom: 16px;">📊 Statistiques mensuelles</h3>
+
+      <!-- Carte mois en cours -->
+      <div class="stats-current-month" id="stats-current-month"></div>
+
+      <!-- Graphique 12 mois -->
+      <div class="stats-chart-section">
+        <h4 style="font-size: 14px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin: 16px 0 12px 0;">📈 12 derniers mois</h4>
+        <div class="stats-chart-tabs">
+          <button class="stats-tab active" data-metric="ca">CA forfait</button>
+          <button class="stats-tab" data-metric="heures">Heures réalisées</button>
+          <button class="stats-tab" data-metric="count">Nombre d'interventions</button>
+          <button class="stats-tab" data-metric="gain">Gain productivité</button>
+        </div>
+        <div style="position: relative; height: 280px; margin-top: 8px;">
+          <canvas id="stats-chart"></canvas>
+        </div>
+      </div>
+
+      <!-- Tableau détail -->
+      <h4 style="font-size: 14px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin: 24px 0 8px 0;">📊 Détail mensuel</h4>
+      <div class="stats-table-wrapper">
+        <table class="stats-table" id="stats-table">
+          <thead>
+            <tr>
+              <th>Mois</th>
+              <th>Interv.</th>
+              <th>Heures</th>
+              <th>CA forfait</th>
+              <th>Gain h/€</th>
+            </tr>
+          </thead>
+          <tbody id="stats-table-body"></tbody>
+        </table>
+      </div>
+
+      <div style="margin-top: 16px; text-align: right;">
+        <button class="secondary" id="btn-close-stats">Fermer</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODALE PDF (pendant et après la génération) -->
+  <div id="pdf-modal" class="modal-overlay hidden">
+    <div class="modal-box" style="max-width: 520px;">
+      <h3 id="pdf-modal-title">📄 Génération de l'OR</h3>
+
+      <!-- État : en cours -->
+      <div id="pdf-loading" class="hidden" style="padding: 30px 20px; text-align: center;">
+        <div style="font-size: 36px; margin-bottom: 12px;">⏳</div>
+        <div style="font-size: 15px; color: var(--text); font-weight: 600; margin-bottom: 6px;">Génération en cours...</div>
+        <div style="font-size: 13px; color: var(--text-muted);">Cela peut prendre 10 à 20 secondes.</div>
+      </div>
+
+      <!-- État : succès -->
+      <div id="pdf-success" class="hidden">
+        <div style="padding: 14px; background: #d1fae5; color: #065f46; border-radius: 8px; font-size: 14px; font-weight: 600; margin-bottom: 16px;">
+          ✅ PDFs générés avec succès !
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <a id="pdf-link-bt" target="_blank" rel="noopener" style="display: flex; align-items: center; gap: 12px; padding: 14px 16px; background: white; border: 2px solid var(--border); border-radius: 10px; text-decoration: none; color: var(--text); font-weight: 600; transition: all 0.15s;">
+            <span style="font-size: 22px;">📄</span>
+            <span>Bon de Travaux</span>
+          </a>
+          <a id="pdf-link-fdl" target="_blank" rel="noopener" style="display: flex; align-items: center; gap: 12px; padding: 14px 16px; background: white; border: 2px solid var(--border); border-radius: 10px; text-decoration: none; color: var(--text); font-weight: 600; transition: all 0.15s;">
+            <span style="font-size: 22px;">📋</span>
+            <span>Feuille de Liaison Réseau</span>
+          </a>
+          <a id="pdf-link-folder" target="_blank" rel="noopener" style="display: flex; align-items: center; gap: 12px; padding: 12px 16px; background: #f1f5f9; border: 1px solid var(--border); border-radius: 10px; text-decoration: none; color: var(--text-muted); font-weight: 500; font-size: 13px; transition: all 0.15s;">
+            <span style="font-size: 18px;">📁</span>
+            <span>Voir tous les OR dans Drive</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- État : erreur -->
+      <div id="pdf-error" class="hidden" style="padding: 14px; background: #fee2e2; color: #991b1b; border-radius: 8px; font-size: 14px; margin-bottom: 16px;">
+        <div style="font-weight: 700; margin-bottom: 6px;">❌ Erreur lors de la génération</div>
+        <div id="pdf-error-message" style="font-size: 13px;"></div>
+      </div>
+
+      <div style="margin-top: 16px; text-align: right;">
+        <button class="secondary" id="btn-close-pdf">Fermer</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODALE HISTORIQUE CLIENT -->
+  <div id="history-modal" class="modal-overlay hidden">
+    <div class="modal-box" style="max-width: 720px;">
+      <h3 id="history-title">📜 Historique client</h3>
+
+      <!-- Stats client -->
+      <div class="history-stats" id="history-stats"></div>
+
+      <!-- Liste des interventions -->
+      <h4 style="font-size: 13px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin: 16px 0 8px 0;">📋 Interventions</h4>
+      <div id="history-list" class="history-list"></div>
+
+      <div style="margin-top: 16px; text-align: right;">
+        <button class="secondary" id="btn-close-history">Fermer</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODALE DÉTAILS -->
+  <div id="modal" class="modal-overlay hidden">
+    <div class="modal-box">
+      <h3 id="modal-title">Intervention</h3>
+      <div id="modal-content"></div>
+      <div style="margin-top: 16px; display: flex; gap: 8px; justify-content: space-between; flex-wrap: wrap;">
+        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+          <button id="btn-edit-intervention">✏️ Modifier</button>
+          <button class="danger" id="btn-delete-intervention">🗑️ Supprimer</button>
+          <button class="secondary" id="btn-call-intervention">📞 Appeler</button>
+          <button class="secondary" id="btn-mail-intervention">📧 Envoyer rappel</button>
+          <button class="secondary" id="btn-history-intervention">📜 Historique</button>
+          <button class="secondary" id="btn-pdf-intervention" style="background: #fef3c7; color: #92400e; border-color: #fcd34d;">📄 OR PDF</button>
+        </div>
+        <button class="secondary" id="btn-close-modal">Fermer</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODALE FORMULAIRE D'AJOUT -->
+  <div id="form-modal" class="modal-overlay hidden">
+    <div class="modal-box">
+      <h3>➕ Nouvelle intervention</h3>
+
+      <!-- Section ESSENTIELS -->
+      <div class="form-section">
+        <div class="form-section-title">📋 Essentiels</div>
+        <div class="form-section-content">
+          <div class="form-row cols-2">
+            <div class="form-row">
+              <label class="required" for="f-date">Date</label>
+              <select id="f-date"></select>
+            </div>
+            <div class="form-row">
+              <label class="required" for="f-technicien">Technicien</label>
+              <select id="f-technicien">
+                <option value="TA1">TA1</option>
+                <option value="TA2">TA2</option>
+                <option value="TA3">TA3</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row cols-2">
+            <div class="form-row">
+              <label class="required" for="f-heure">Heure début</label>
+              <select id="f-heure"></select>
+            </div>
+            <div class="form-row">
+              <label for="f-duree">Durée (h)</label>
+              <input type="number" id="f-duree" step="0.5" min="0.5" placeholder="(auto depuis forfait)">
+              <div class="field-hint">Vide = durée du forfait</div>
+            </div>
+          </div>
+          <div class="form-row">
+            <label class="required" for="f-client">Client</label>
+            <input type="text" id="f-client" placeholder="Nom du client">
+          </div>
+          <div class="form-row">
+            <label class="required" for="f-forfait">Forfait</label>
+            <select id="f-forfait"><option value="">— Choisir un forfait —</option></select>
+            <div class="field-hint" id="f-forfait-info">Prix : — • Durée : —</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section CLIENT (repliable) -->
+      <div class="form-section">
+        <div class="form-section-title collapsed" data-toggle="client">
+          <span class="toggle-icon">▼</span> 👤 Détails client
+        </div>
+        <div class="form-section-content collapsed" data-content="client">
+          <div class="form-row cols-2">
+            <div class="form-row">
+              <label for="f-numClient">N° client</label>
+              <input type="text" id="f-numClient">
+            </div>
+            <div class="form-row">
+              <label for="f-tel">Téléphone</label>
+              <input type="text" id="f-tel">
+            </div>
+          </div>
+          <div class="form-row">
+            <label for="f-email">📧 Email client</label>
+            <input type="email" id="f-email" placeholder="exemple@gmail.com">
+            <div class="field-hint">Permet l'envoi automatique du rappel par mail</div>
+          </div>
+          <div class="form-row cols-2">
+            <div class="form-row">
+              <label for="f-vehicule">Véhicule</label>
+              <input type="text" id="f-vehicule">
+            </div>
+            <div class="form-row">
+              <label for="f-immat">Immatriculation</label>
+              <input type="text" id="f-immat">
+            </div>
+          </div>
+          <div class="form-row cols-2">
+            <div class="form-row">
+              <label for="f-km">Km</label>
+              <input type="text" id="f-km">
+            </div>
+            <div class="form-row">
+              <label for="f-fidelite">Carte fidélité</label>
+              <select id="f-fidelite">
+                <option value="NON">Non</option>
+                <option value="OUI">Oui (-10%)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section AUTRES (repliable) -->
+      <div class="form-section">
+        <div class="form-section-title collapsed" data-toggle="autres">
+          <span class="toggle-icon">▼</span> ⚙️ Autres infos
+        </div>
+        <div class="form-section-content collapsed" data-content="autres">
+          <!-- Temps complémentaire -->
+          <div class="tc-box">
+            <div class="tc-header">⏱️ Temps complémentaire <span class="tc-optional">(optionnel)</span></div>
+            <div class="form-row cols-2">
+              <div class="form-row">
+                <label for="f-mopa">Réf. MOPA</label>
+                <select id="f-mopa">
+                  <option value="">— Aucun —</option>
+                </select>
+              </div>
+              <div class="form-row">
+                <label for="f-tcHeures">Heures</label>
+                <input type="number" id="f-tcHeures" step="0.25" min="0" value="0">
+              </div>
+            </div>
+            <div class="tc-summary" id="f-tc-summary">Sélectionnez un MOPA pour voir le tarif</div>
+          </div>
+
+          <div class="form-row">
+            <label for="f-intervenant">Intervenant</label>
+            <input type="text" id="f-intervenant">
+          </div>
+          <div class="form-row">
+            <label for="f-fppec2">FPPEC2 (prise en charge véhicule +30€)</label>
+            <select id="f-fppec2">
+              <option value="NON">Non</option>
+              <option value="OUI">Oui</option>
+            </select>
+          </div>
+          <div class="form-row">
+            <label for="f-commentaire">Commentaire</label>
+            <textarea id="f-commentaire" rows="2"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <div id="form-feedback" class="form-feedback"></div>
+
+      <div class="form-actions">
+        <button class="secondary" id="btn-cancel-form">Annuler</button>
+        <button class="secondary" id="btn-submit-and-add">➕ Valider et ajouter un autre forfait</button>
+        <button id="btn-submit-form">✅ Valider</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+  <script>
+    // Service Worker pour PWA installable
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js')
+          .then(reg => console.log('[PWA] SW enregistré:', reg.scope))
+          .catch(err => console.error('[PWA] SW erreur:', err));
+      });
+    }
+  </script>
+
+  <script>
+    // =====================================================
+    // CONFIGURATION MULTI-SITES
+    // =====================================================
+    const CONFIG = {
+      CLIENT_ID: '886061122740-vlcu74bri00qmahjat3s253ol6mun5hi.apps.googleusercontent.com',
+      API_KEY: 'AIzaSyA-KBiLKtbG-S7BsyC85IWrrSEpxh5chPI',
+      SCOPES: 'https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/userinfo.email',
+      // URL de l'Apps Script Web App pour générer les OR PDF
+      PDF_GENERATOR_URL: 'https://script.google.com/macros/s/AKfycbz6bRDDY40zPZu4DbS45no_8N8UTzqxc1NTfRhMYhK3mNaUwnHFnV8SuCKOJAtxwGbG/exec',
+      PDF_GENERATOR_TOKEN: 'narbonne-planning-2026-secret-token'
+    };
+
+    // Liste des magasins. Pour ajouter un site : ajouter une entrée ici + permission ci-dessous.
+    const SITES = {
+      'aubagne': {
+        name: 'Aubagne',
+        sheetId: '1fYu37DvUt-8Sad0nZkAO0x9QNYYpTJaDnEQ2WjDS2mQ',
+        mailReplyTo: 'DM.aubagne@narbonneaccessoires.fr',
+        defaultHeuresTA: [35, 35, 35]
+      },
+      'montpellier': {
+        name: 'Montpellier',
+        sheetId: '1f5A-91-W-5kPJmeFjwxMEftCn3UCSON7eg9PBGxOo90',
+        mailReplyTo: 'Dm.montpellier@narbonneaccessoires.fr',
+        defaultHeuresTA: [35, 35, 35]
+      },
+      'pennes-mirabeau': {
+        name: 'Les Pennes Mirabeau',
+        sheetId: '1GwQ_-k_Q-Onx5nCFAA8e4crKPz2YKkc042luwkUr1GY',
+        mailReplyTo: 'dmpennesmirabeau@narbonneaccessoires.fr',
+        defaultHeuresTA: [35, 35, 35]
+      },
+      'lyon': {
+        name: 'Lyon',
+        sheetId: '1QLYjMWE4UNbUiQ9Yo2FVuchX6EX3vZcmVw-eFbjBSqU',
+        mailReplyTo: 'dm.lyon@narbonneaccessoires.fr',
+        defaultHeuresTA: [35, 35, 35]
+      },
+      'macon': {
+        name: 'Mâcon',
+        sheetId: '1DDTypziSM7mTtuWdKbhKrH5nA5d6gpNFE3zzHe3fo24',
+        mailReplyTo: 'dm.macon@narbonneaccessoires.fr',
+        defaultHeuresTA: [35, 35, 35]
+      },
+      'annecy': {
+        name: 'Annecy',
+        sheetId: '1OdRCyi4v4KlFPLjb7YX-LTGmitpOfDPrjPgH4hxzzEQ',
+        mailReplyTo: 'dm.annecy@narbonneaccessoires.fr',
+        defaultHeuresTA: [35, 35, 35]
+      },
+      'saint-etienne': {
+        name: 'Saint-Étienne',
+        sheetId: '1eUGoVMANCJ0x1spUYz9vd_Hx7e5deZ7PN01mpvY0OW0',
+        mailReplyTo: 'dm.saint-etienne@narbonneaccessoires.fr',
+        defaultHeuresTA: [35, 35, 35]
+      }
+    };
+
+    // Permissions par utilisateur. ['*'] = super-admin (voit tout).
+    // Pour ajouter un DM : 'dm.email@gmail.com': ['nomdusite']
+    const USER_PERMISSIONS = {
+      // Super-admin (voit tous les magasins)
+      'p.giraudnarbonneaccessoires@gmail.com': ['*'],
+
+      // DM par magasin (1 magasin = 1 DM, sauf Lyon qui en a 2)
+      'narb.118.dm@gmail.com': ['aubagne'],
+      'narb.132.dm@gmail.com': ['montpellier'],
+      'narb.110.dm@gmail.com': ['pennes-mirabeau'],
+      'narb.136.dm@gmail.com': ['lyon'],
+      'accessoiresnarbonne00@gmail.com': ['lyon'],
+      'narb.10g.dm@gmail.com': ['macon'],
+      'narb.e51.dm@gmail.com': ['annecy'],
+      'saintetienne130@gmail.com': ['saint-etienne']
+    };
+    const SLOT_DURATION = 0.5;
+    const PAUSE_START = 12;
+    const PAUSE_END = 13;
+    const WORK_HOURS_START = 8;
+    const WORK_HOURS_END = 18;
+    const FPPEC2_PRIX = 30;
+    const ROW_OFFSET = 6;  // ligne 6 du Sheet = 08:00
+
+    // Fil rouge : marqueurs et couleurs
+    const FILROUGE_TAG = 'FILROUGE';  // valeur dans la colonne FORFAIT pour identifier un fil rouge
+    const FILROUGE_ID_PREFIX = 'FR_';  // préfixe d'ID pour les fils rouges
+    const FILROUGE_COLORS = {
+      'ROUGE':  '#FFB6C6',
+      'JAUNE':  '#FFD700',
+      'VERT':   '#90EE90',
+      'ORANGE': '#FFA500',
+      'BLEU':   '#87CEEB',
+      'GRIS':   '#D3D3D3'
+    };
+
+    // Urgence : préfixe d'ID pour identifier les urgences (interventions sans créneau horaire fixe, liées à un TA et un jour)
+    const URGENCE_ID_PREFIX = 'URG_';
+    const DAYS = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
+    const DAYS_SHORT = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
+
+    // Mapping jour → colonnes Sheet par technicien (basé sur ton Apps Script)
+    const DAY_COL_MAP = {
+      0: { TA1: 2,  TA2: 3,  TA3: 4 },    // Lundi
+      1: { TA1: 5,  TA2: 6,  TA3: 7 },    // Mardi
+      2: { TA1: 8,  TA2: 9,  TA3: 10 },   // Mercredi
+      3: { TA1: 11, TA2: 12, TA3: 13 },   // Jeudi
+      4: { TA1: 14, TA2: 15, TA3: 16 },   // Vendredi
+      5: { TA1: 17, TA2: 18, TA3: 19 }    // Samedi
+    };
+
+    const COL = {
+      ID: 0, DATE: 1, ROW: 2, COL: 3,
+      CLIENT: 4, NUM_CLIENT: 5, TEL: 6,
+      FORFAIT: 7, DESIGNATION: 8,
+      TEMPS_REEL: 9, TEMPS_COMPL: 10,
+      INTERVENANT: 11, FIDELITE: 12, COMMENTAIRE: 13,
+      CA_FORFAIT: 14, PFA: 15, RECYCLAGE: 16, PRIX_NET: 17,
+      DUREE_PREVUE: 18, TEMPS_TOTAL: 19,
+      GAIN_H: 20, GAIN_E: 21,
+      KM: 22, VEHICULE: 23, IMMAT: 24,
+      FPPEC2: 25, CA_FPPEC2: 26,
+      REF_MOPA: 27, CA_TEMPS_COMPL: 28,
+      PFA_TC: 29, RECYCLAGE_TC: 30, MOPA_PFA: 31,
+      TECHNICIEN: 32,
+      EMAIL: 33  // colonne AH (nouvelle)
+    };
+  </script>
+
+  <script>
+    let tokenClient = null;
+    let accessToken = null;
+    let userEmail = null;
+    let userName = null;
+    let userPicture = null;
+    let displayedMonth = new Date();
+    displayedMonth.setDate(1);
+    let selectedMonday = null;
+    let allInterventions = [];
+    let assortiment = [];  // Cache des forfaits
+    let joursFeries = [];  // Cache des jours fériés (Set de timestamps)
+    let heuresTaCache = {};  // Cache des heures TA par semaine : { 'S18_2026': [35, 39, 28], ... }
+    let heuresTaCurrent = [35, 35, 35];  // Heures dispo de la semaine actuellement affichée
+    let currentEditContext = null;  // Données du clic pour pré-remplir le formulaire
+    let editingDataIdx = null;  // Index de l'intervention en cours d'édition (null si nouveau)
+    let donneesSheetGid = null;  // GID de l'onglet DONNEES_OK (pour suppression de ligne)
+    let currentViewMode = 'week';  // 'week' ou 'day'
+    let currentViewDay = 0;  // Index du jour affiché en mode 'day' (0=Lundi, 5=Samedi)
+    let currentSite = null;  // Clé du site sélectionné (ex: 'aubagne')
+    let accessibleSites = [];  // Liste des sites auxquels l'user a accès
+
+    // =====================================================
+    // HELPERS MULTI-SITES
+    // =====================================================
+    function getCurrentSheetId() {
+      if (!currentSite || !SITES[currentSite]) return null;
+      return SITES[currentSite].sheetId;
+    }
+
+    function getCurrentSiteName() {
+      if (!currentSite || !SITES[currentSite]) return '—';
+      return SITES[currentSite].name;
+    }
+
+    function getCurrentMailReplyTo() {
+      if (!currentSite || !SITES[currentSite]) return '';
+      return SITES[currentSite].mailReplyTo;
+    }
+
+    function getAccessibleSitesForUser(email) {
+      if (!email) return [];
+      const emailLower = email.toLowerCase();
+      const perms = USER_PERMISSIONS[emailLower] || USER_PERMISSIONS[email] || [];
+      // ['*'] = accès à tous les sites
+      if (perms.includes('*')) {
+        return Object.keys(SITES);
+      }
+      // Sinon, retourner uniquement les sites autorisés qui existent dans SITES
+      return perms.filter(siteKey => SITES[siteKey]);
+    }
+
+    window.addEventListener('load', () => {
+      const checkGoogle = setInterval(() => {
+        if (window.google && window.google.accounts) {
+          clearInterval(checkGoogle);
+          initGoogleAuth();
+        }
+      }, 100);
+
+      document.getElementById('screen-login').classList.remove('hidden');
+
+      document.getElementById('btn-login').addEventListener('click', () => login(false));
+      document.getElementById('btn-logout').addEventListener('click', logout);
+      document.getElementById('btn-prev-month').addEventListener('click', () => changeMonth(-1));
+      document.getElementById('btn-next-month').addEventListener('click', () => changeMonth(1));
+      document.getElementById('btn-today').addEventListener('click', goToToday);
+      document.getElementById('btn-refresh').addEventListener('click', () => loadAndRender(true));
+      document.getElementById('btn-stats').addEventListener('click', openStatsModal);
+      document.getElementById('btn-close-stats').addEventListener('click', () => {
+        document.getElementById('stats-modal').classList.add('hidden');
+      });
+      document.getElementById('stats-modal').addEventListener('click', (e) => {
+        if (e.target.id === 'stats-modal') {
+          document.getElementById('stats-modal').classList.add('hidden');
+        }
+      });
+
+      // Fil rouge
+      document.getElementById('btn-add-filrouge').addEventListener('click', () => openFilrougeForm(null));
+      document.getElementById('btn-cancel-filrouge').addEventListener('click', closeFilrougeForm);
+      document.getElementById('btn-submit-filrouge').addEventListener('click', submitFilrougeForm);
+      document.getElementById('filrouge-modal').addEventListener('click', (e) => {
+        if (e.target.id === 'filrouge-modal') closeFilrougeForm();
+      });
+      // Urgence
+      document.getElementById('btn-add-urgence').addEventListener('click', () => openUrgenceForm(null));
+      document.getElementById('btn-cancel-urgence').addEventListener('click', closeUrgenceForm);
+      document.getElementById('btn-submit-urgence').addEventListener('click', submitUrgenceForm);
+      document.getElementById('urgence-modal').addEventListener('click', (e) => {
+        if (e.target.id === 'urgence-modal') closeUrgenceForm();
+      });
+      document.getElementById('urg-forfait').addEventListener('change', updateUrgenceForfaitInfo);
+      // Onglets du graphique
+      document.querySelectorAll('.stats-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+          document.querySelectorAll('.stats-tab').forEach(t => t.classList.remove('active'));
+          tab.classList.add('active');
+          renderStatsChart(tab.getAttribute('data-metric'));
+        });
+      });
+      document.getElementById('btn-close-modal').addEventListener('click', closeModal);
+
+      // Sélecteur de site dans le header
+      document.getElementById('site-switcher').addEventListener('change', (e) => {
+        const newSite = e.target.value;
+        if (newSite && newSite !== currentSite) {
+          selectSite(newSite);
+        }
+      });
+
+      // Recherche client
+      const searchInput = document.getElementById('search-input');
+      let searchTimer = null;
+      searchInput.addEventListener('input', (e) => {
+        clearTimeout(searchTimer);
+        const query = e.target.value.trim();
+        document.getElementById('search-clear').classList.toggle('hidden', query.length === 0);
+        // Debounce 250ms pour éviter de recalculer à chaque touche
+        searchTimer = setTimeout(() => performSearch(query), 250);
+      });
+      document.getElementById('search-clear').addEventListener('click', () => {
+        searchInput.value = '';
+        document.getElementById('search-clear').classList.add('hidden');
+        document.getElementById('search-results').classList.add('hidden');
+        searchInput.focus();
+      });
+      document.getElementById('search-close').addEventListener('click', () => {
+        document.getElementById('search-results').classList.add('hidden');
+      });
+
+      // Sélecteur Vue Semaine / Vue Jour
+      document.getElementById('view-mode-select').addEventListener('change', (e) => {
+        currentViewMode = e.target.value;
+        const daySelect = document.getElementById('view-day-select');
+        if (currentViewMode === 'day') {
+          daySelect.classList.remove('hidden');
+        } else {
+          daySelect.classList.add('hidden');
+        }
+        if (selectedMonday) renderPlanning();
+      });
+      document.getElementById('view-day-select').addEventListener('change', (e) => {
+        currentViewDay = parseInt(e.target.value);
+        if (selectedMonday) renderPlanning();
+      });
+      document.getElementById('modal').addEventListener('click', (e) => {
+        if (e.target.id === 'modal') closeModal();
+      });
+      document.getElementById('btn-edit-intervention').addEventListener('click', () => {
+        const idx = parseInt(document.getElementById('modal').dataset.idx);
+        if (!isNaN(idx)) editIntervention(idx);
+      });
+      document.getElementById('btn-delete-intervention').addEventListener('click', () => {
+        const idx = parseInt(document.getElementById('modal').dataset.idx);
+        if (!isNaN(idx)) deleteIntervention(idx);
+      });
+      document.getElementById('btn-mail-intervention').addEventListener('click', () => {
+        const idx = parseInt(document.getElementById('modal').dataset.idx);
+        if (!isNaN(idx)) sendReminderMail(idx);
+      });
+      document.getElementById('btn-call-intervention').addEventListener('click', () => {
+        const idx = parseInt(document.getElementById('modal').dataset.idx);
+        if (!isNaN(idx)) callClient(idx);
+      });
+      document.getElementById('btn-history-intervention').addEventListener('click', () => {
+        const idx = parseInt(document.getElementById('modal').dataset.idx);
+        if (!isNaN(idx)) openClientHistory(idx);
+      });
+      document.getElementById('btn-pdf-intervention').addEventListener('click', () => {
+        const idx = parseInt(document.getElementById('modal').dataset.idx);
+        if (!isNaN(idx)) generateORPDF(idx);
+      });
+      document.getElementById('btn-close-pdf').addEventListener('click', () => {
+        document.getElementById('pdf-modal').classList.add('hidden');
+      });
+      document.getElementById('pdf-modal').addEventListener('click', (e) => {
+        if (e.target.id === 'pdf-modal') {
+          document.getElementById('pdf-modal').classList.add('hidden');
+        }
+      });
+      document.getElementById('btn-close-history').addEventListener('click', () => {
+        document.getElementById('history-modal').classList.add('hidden');
+      });
+      document.getElementById('history-modal').addEventListener('click', (e) => {
+        if (e.target.id === 'history-modal') {
+          document.getElementById('history-modal').classList.add('hidden');
+        }
+      });
+
+      // Formulaire d'ajout
+      document.getElementById('btn-add-quick').addEventListener('click', () => openAddForm(null));
+      document.getElementById('btn-cancel-form').addEventListener('click', closeAddForm);
+      document.getElementById('btn-submit-form').addEventListener('click', () => submitForm(false));
+      document.getElementById('btn-submit-and-add').addEventListener('click', () => submitForm(true));
+      document.getElementById('form-modal').addEventListener('click', (e) => {
+        if (e.target.id === 'form-modal') closeAddForm();
+      });
+      document.getElementById('f-forfait').addEventListener('change', updateForfaitInfo);
+      document.getElementById('f-fidelite').addEventListener('change', updateForfaitInfo);
+      document.getElementById('f-mopa').addEventListener('change', updateTcSummary);
+      document.getElementById('f-tcHeures').addEventListener('input', updateTcSummary);
+
+      // Sections repliables
+      document.querySelectorAll('.form-section-title[data-toggle]').forEach(el => {
+        el.addEventListener('click', () => {
+          const key = el.getAttribute('data-toggle');
+          const content = document.querySelector(`.form-section-content[data-content="${key}"]`);
+          el.classList.toggle('collapsed');
+          content.classList.toggle('collapsed');
+        });
+      });
+    });
+
+    function initGoogleAuth() {
+      tokenClient = google.accounts.oauth2.initTokenClient({
+        client_id: CONFIG.CLIENT_ID,
+        scope: CONFIG.SCOPES,
+        callback: onAuthSuccess,
+        error_callback: onAuthError
+      });
+      if (localStorage.getItem('hasLoggedInBefore') === 'true') {
+        showStatus('Reconnexion en cours...', 'info');
+        login(true);
+      } else {
+        showStatus('Prêt — cliquez pour vous connecter', 'info');
+      }
+    }
+
+    function login(silent) {
+      if (!tokenClient) { showStatus('⚠️ Google Auth non chargé. Rechargez la page.', 'error'); return; }
+      tokenClient.requestAccessToken({ prompt: silent ? '' : 'consent' });
+    }
+
+    async function onAuthSuccess(tokenResponse) {
+      if (!tokenResponse.access_token) { showStatus('❌ Échec de l\'authentification', 'error'); return; }
+      accessToken = tokenResponse.access_token;
+      localStorage.setItem('hasLoggedInBefore', 'true');
+      if (window.tokenRefreshTimer) clearTimeout(window.tokenRefreshTimer);
+      window.tokenRefreshTimer = setTimeout(() => {
+        if (localStorage.getItem('hasLoggedInBefore') === 'true') login(true);
+      }, 55 * 60 * 1000);
+      try {
+        const res = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+          headers: { 'Authorization': `Bearer ${accessToken}` }
+        });
+        const userInfo = await res.json();
+        userEmail = userInfo.email;
+        userName = userInfo.name || userInfo.email;
+        userPicture = userInfo.picture || '';
+
+        // Calculer les sites accessibles pour cet utilisateur
+        accessibleSites = getAccessibleSitesForUser(userEmail);
+
+        if (accessibleSites.length === 0) {
+          // Aucun accès : afficher message d'erreur
+          showSiteModal(true);  // mode "no access"
+          return;
+        }
+
+        // Vérifier si un site est mémorisé en localStorage et toujours accessible
+        const savedSite = localStorage.getItem('selectedSite');
+        if (savedSite && accessibleSites.includes(savedSite)) {
+          // Auto-sélection : on connaît déjà le site
+          await selectSite(savedSite);
+        } else if (accessibleSites.length === 1) {
+          // Un seul site accessible : sélection auto
+          await selectSite(accessibleSites[0]);
+        } else {
+          // Plusieurs sites : afficher la modale de choix
+          showSiteModal(false);
+        }
+      } catch (err) {
+        showStatus('❌ Erreur récupération profil : ' + err.message, 'error');
+      }
+    }
+
+    function onAuthError(err) {
+      console.error('Auth error:', err);
+      // Ne pas spammer l'utilisateur si c'est juste une tentative silencieuse qui a échoué
+      if (err && err.type === 'popup_closed') {
+        showStatus('Cliquez pour vous connecter', 'info');
+        localStorage.removeItem('hasLoggedInBefore');
+      } else {
+        showStatus('❌ Erreur OAuth : ' + (err.message || JSON.stringify(err)), 'error');
+      }
+    }
+
+    // =====================================================
+    // SÉLECTION DU SITE
+    // =====================================================
+    function showSiteModal(noAccess) {
+      const modal = document.getElementById('site-modal');
+      const list = document.getElementById('site-list');
+      const noAccessEl = document.getElementById('site-modal-no-access');
+      list.innerHTML = '';
+
+      if (noAccess) {
+        list.classList.add('hidden');
+        noAccessEl.classList.remove('hidden');
+      } else {
+        list.classList.remove('hidden');
+        noAccessEl.classList.add('hidden');
+        // Créer un bouton par site accessible
+        accessibleSites.forEach(siteKey => {
+          const site = SITES[siteKey];
+          if (!site) return;
+          const btn = document.createElement('button');
+          btn.className = 'site-button';
+          btn.innerHTML = `<span class="site-icon">🏢</span><span>${site.name}</span>`;
+          btn.addEventListener('click', () => {
+            modal.classList.add('hidden');
+            selectSite(siteKey);
+          });
+          list.appendChild(btn);
+        });
+      }
+      modal.classList.remove('hidden');
+    }
+
+    async function selectSite(siteKey) {
+      if (!SITES[siteKey]) {
+        console.error('Site invalide:', siteKey);
+        return;
+      }
+      currentSite = siteKey;
+      localStorage.setItem('selectedSite', siteKey);
+
+      // Reset des données qui sont spécifiques au site
+      allInterventions = [];
+      assortiment = [];
+      mopas = [];
+      joursFeries = [];
+      heuresTaCache = {};
+      const defaults = (SITES[siteKey].defaultHeuresTA) || [35, 35, 35];
+      heuresTaCurrent = [...defaults];
+      donneesSheetGid = null;
+
+      // Reset de la recherche (résultats du site précédent obsolètes)
+      const searchInput = document.getElementById('search-input');
+      if (searchInput) searchInput.value = '';
+      const searchResults = document.getElementById('search-results');
+      if (searchResults) searchResults.classList.add('hidden');
+      const searchClear = document.getElementById('search-clear');
+      if (searchClear) searchClear.classList.add('hidden');
+
+      // Mettre à jour l'affichage
+      document.getElementById('header-site-name').textContent = SITES[siteKey].name;
+
+      // Configurer le sélecteur de site dans le header
+      const switcher = document.getElementById('site-switcher');
+      switcher.innerHTML = '';
+      if (accessibleSites.length > 1) {
+        accessibleSites.forEach(key => {
+          const opt = document.createElement('option');
+          opt.value = key;
+          opt.textContent = SITES[key].name;
+          if (key === siteKey) opt.selected = true;
+          switcher.appendChild(opt);
+        });
+        switcher.classList.remove('hidden');
+      } else {
+        switcher.classList.add('hidden');
+      }
+
+      // Afficher l'app et charger les données
+      showAppScreen();
+      renderMonthCalendar();
+      goToToday();
+      fetchAssortiment().catch(e => console.warn('Assortiment:', e));
+      fetchJoursFeries().catch(e => console.warn('JoursFeries:', e));
+      fetchHeuresTa().catch(e => console.warn('HeuresTA:', e));
+    }
+
+    function logout() {
+      if (accessToken) google.accounts.oauth2.revoke(accessToken);
+      accessToken = null; userEmail = null; allInterventions = []; assortiment = [];
+      joursFeries = []; currentSite = null; accessibleSites = [];
+      if (window.tokenRefreshTimer) clearTimeout(window.tokenRefreshTimer);
+      localStorage.removeItem('hasLoggedInBefore');
+      localStorage.removeItem('selectedSite');
+      document.getElementById('screen-login').classList.remove('hidden');
+      document.getElementById('screen-app').classList.add('hidden');
+      document.getElementById('site-modal').classList.add('hidden');
+      showStatus('Déconnecté', 'info');
+    }
+
+    function showAppScreen() {
+      document.getElementById('screen-login').classList.add('hidden');
+      document.getElementById('screen-app').classList.remove('hidden');
+      document.getElementById('user-name').textContent = userName;
+      document.getElementById('user-email').textContent = userEmail;
+      const avatar = document.getElementById('user-avatar');
+      if (userPicture) { avatar.src = userPicture; avatar.style.display = 'block'; }
+      else avatar.style.display = 'none';
+    }
+
+    function showStatus(msg, type) {
+      const el = document.getElementById('status');
+      el.textContent = msg; el.className = `status-${type}`; el.style.display = 'block';
+    }
+
+    // =====================================================
+    // CALENDRIER MENSUEL
+    // =====================================================
+    function renderMonthCalendar() {
+      const monthNames = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+      document.getElementById('month-title').textContent = `${monthNames[displayedMonth.getMonth()]} ${displayedMonth.getFullYear()}`;
+      const grid = document.getElementById('month-grid');
+      grid.innerHTML = '';
+      DAYS_SHORT.forEach(d => {
+        const h = document.createElement('div');
+        h.className = 'month-grid-header'; h.textContent = d;
+        grid.appendChild(h);
+      });
+      const firstOfMonth = new Date(displayedMonth.getFullYear(), displayedMonth.getMonth(), 1);
+      const dayOfWeek = (firstOfMonth.getDay() + 6) % 7;
+      const firstDay = new Date(firstOfMonth);
+      firstDay.setDate(firstOfMonth.getDate() - dayOfWeek);
+      const today = new Date(); today.setHours(0,0,0,0);
+      for (let i = 0; i < 42; i++) {
+        const d = new Date(firstDay); d.setDate(firstDay.getDate() + i);
+        const cell = document.createElement('div');
+        cell.className = 'day-cell'; cell.textContent = d.getDate();
+        if (d.getMonth() !== displayedMonth.getMonth()) cell.classList.add('other-month');
+        if (d.getTime() === today.getTime()) cell.classList.add('today');
+        if (d.getDay() === 1 && d.getMonth() === displayedMonth.getMonth()) {
+          cell.classList.add('is-monday-selectable');
+          cell.addEventListener('click', () => selectWeek(new Date(d)));
+        }
+        if (selectedMonday) {
+          const weekEnd = new Date(selectedMonday);
+          weekEnd.setDate(selectedMonday.getDate() + 6);
+          if (d >= selectedMonday && d <= weekEnd && d.getMonth() === displayedMonth.getMonth()) cell.classList.add('in-week-selected');
+        }
+        grid.appendChild(cell);
+      }
+    }
+
+    function changeMonth(delta) { displayedMonth.setMonth(displayedMonth.getMonth() + delta); renderMonthCalendar(); }
+    function goToToday() {
+      const today = new Date();
+      const dayOfWeek = (today.getDay() + 6) % 7;
+      const monday = new Date(today);
+      monday.setDate(today.getDate() - dayOfWeek);
+      monday.setHours(0,0,0,0);
+      displayedMonth = new Date(monday); displayedMonth.setDate(1);
+      selectWeek(monday);
+    }
+    function selectWeek(monday) {
+      selectedMonday = new Date(monday); selectedMonday.setHours(0,0,0,0);
+      renderMonthCalendar(); loadAndRender(false);
+    }
+
+    // =====================================================
+    // CHARGEMENT DONNÉES
+    // =====================================================
+    async function loadAndRender(forceReload) {
+      if (!selectedMonday) return;
+      const content = document.getElementById('planning-content');
+      content.innerHTML = '<div class="loader">⏳ Chargement du planning...</div>';
+      if (allInterventions.length === 0 || forceReload) {
+        try { await fetchAllInterventions(); }
+        catch (err) {
+          content.innerHTML = `<div class="loader" style="color:#991b1b;">❌ Erreur : ${err.message}</div>`;
+          return;
+        }
+      }
+      renderPlanning(); renderRecap(); renderFilrouge(); renderUrgences();
+    }
+
+    async function fetchAllInterventions() {
+      const url = `https://sheets.googleapis.com/v4/spreadsheets/${getCurrentSheetId()}/values/DONNEES_OK!A2:AH?valueRenderOption=UNFORMATTED_VALUE&dateTimeRenderOption=SERIAL_NUMBER`;
+      const res = await fetch(url, { headers: { 'Authorization': `Bearer ${accessToken}` } });
+      if (!res.ok) { const errText = await res.text(); throw new Error(`HTTP ${res.status} : ${errText}`); }
+      const data = await res.json();
+      allInterventions = data.values || [];
+    }
+
+    let mopas = [];  // Cache des MOPAs (temps complémentaire)
+
+    async function fetchAssortiment() {
+      // Lecture étendue : A-G pour les forfaits FP, et I-L pour les MOPAs
+      const url = `https://sheets.googleapis.com/v4/spreadsheets/${getCurrentSheetId()}/values/ASSORTIMENT!A2:L?valueRenderOption=UNFORMATTED_VALUE`;
+      const res = await fetch(url, { headers: { 'Authorization': `Bearer ${accessToken}` } });
+      if (!res.ok) throw new Error('Impossible de charger ASSORTIMENT');
+      const data = await res.json();
+      const rows = data.values || [];
+
+      // Forfaits (colonnes A-G = index 0-6)
+      assortiment = rows.filter(r => r[0]).map(r => ({
+        code: String(r[0] || '').trim(),
+        duree: Number(r[1]) || 0,
+        prix: Number(r[2]) || 0,
+        pfa: Number(r[3]) || 0,
+        recyclage: Number(r[4]) || 0,
+        prixNet: Number(r[5]) || Number(r[2]) || 0,
+        designation: r[6] || ''
+      }));
+
+      // MOPAs (colonnes I-L = index 8-11)
+      mopas = rows.filter(r => r[8]).map(r => ({
+        code: String(r[8] || '').trim(),
+        prixParH: Number(r[9]) || 0,
+        pfa: Number(r[10]) || 0,
+        recyclage: Number(r[11]) || 0
+      }));
+
+      console.log(`[Assortiment] ${assortiment.length} forfaits + ${mopas.length} MOPAs chargés`);
+    }
+
+    // =====================================================
+    // HEURES TA (par semaine)
+    // =====================================================
+
+    // Calcule la clé de semaine au format S18_2026 à partir d'un lundi
+    function getWeekKey(monday) {
+      if (!monday) return '';
+      // Calcul ISO 8601 du numéro de semaine
+      const d = new Date(Date.UTC(monday.getFullYear(), monday.getMonth(), monday.getDate()));
+      // Aligner sur le jeudi de la semaine (ISO)
+      d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
+      const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+      const weekNum = Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+      return `S${weekNum}_${d.getUTCFullYear()}`;
+    }
+
+    // Charge toutes les heures TA depuis l'onglet HEURES_TA
+    async function fetchHeuresTa() {
+      const url = `https://sheets.googleapis.com/v4/spreadsheets/${getCurrentSheetId()}/values/HEURES_TA!A:D?valueRenderOption=UNFORMATTED_VALUE`;
+      try {
+        const res = await fetch(url, { headers: { 'Authorization': `Bearer ${accessToken}` } });
+        if (!res.ok) {
+          console.warn('[HeuresTA] Onglet HEURES_TA introuvable ou inaccessible');
+          return;
+        }
+        const data = await res.json();
+        const rows = data.values || [];
+        heuresTaCache = {};
+        rows.forEach(r => {
+          const key = String(r[0] || '').trim();
+          if (!key || !key.match(/^S\d+_\d{4}$/)) return;  // Ignorer en-tête et lignes invalides
+          heuresTaCache[key] = [
+            Number(r[1]) || 0,
+            Number(r[2]) || 0,
+            Number(r[3]) || 0
+          ];
+        });
+        console.log(`[HeuresTA] ${Object.keys(heuresTaCache).length} semaines chargées`);
+      } catch (err) {
+        console.warn('[HeuresTA] Erreur chargement :', err.message);
+      }
+    }
+
+    // Récupère les heures TA pour la semaine courante (depuis cache, ou défaut/héritage)
+    function getHeuresTaForCurrentWeek() {
+      if (!selectedMonday) return [...((SITES[currentSite] && SITES[currentSite].defaultHeuresTA) || [35, 35, 35])];
+      const key = getWeekKey(selectedMonday);
+      // 1. Si déjà saisi cette semaine → prendre ces valeurs
+      if (heuresTaCache[key]) return [...heuresTaCache[key]];
+      // 2. Sinon, prendre la semaine la plus récente strictement antérieure
+      const sortedKeys = Object.keys(heuresTaCache).sort();
+      const previousKey = sortedKeys.filter(k => k < key).pop();
+      if (previousKey) return [...heuresTaCache[previousKey]];
+      // 3. Sinon, valeurs par défaut du site
+      return [...((SITES[currentSite] && SITES[currentSite].defaultHeuresTA) || [35, 35, 35])];
+    }
+
+    // Sauvegarde les heures TA pour la semaine courante dans Sheets
+    async function saveHeuresTaForCurrentWeek(values) {
+      if (!selectedMonday) return;
+      const key = getWeekKey(selectedMonday);
+      heuresTaCurrent = [...values];
+
+      // Mettre à jour le cache local immédiatement
+      heuresTaCache[key] = [...values];
+
+      try {
+        // 1. Vérifier si la ligne existe déjà
+        const url = `https://sheets.googleapis.com/v4/spreadsheets/${getCurrentSheetId()}/values/HEURES_TA!A:D?valueRenderOption=UNFORMATTED_VALUE`;
+        const res = await fetch(url, { headers: { 'Authorization': `Bearer ${accessToken}` } });
+        if (!res.ok) {
+          // Onglet manquant : on alerte mais on continue (cache local OK)
+          console.warn('[HeuresTA] Onglet HEURES_TA introuvable - création nécessaire');
+          alert('⚠️ L\'onglet HEURES_TA est manquant dans le Sheets.\n\nLes heures sont mémorisées localement mais ne seront pas sauvegardées tant que l\'onglet n\'existe pas.');
+          return;
+        }
+        const data = await res.json();
+        const rows = data.values || [];
+        let rowIndex = -1;
+        for (let i = 0; i < rows.length; i++) {
+          if (String(rows[i][0] || '').trim() === key) { rowIndex = i; break; }
+        }
+
+        const newRow = [key, values[0], values[1], values[2]];
+        let writeUrl, method;
+        if (rowIndex >= 0) {
+          // UPDATE de la ligne existante (i+1 = numéro de ligne dans Sheets)
+          const sheetRow = rowIndex + 1;
+          writeUrl = `https://sheets.googleapis.com/v4/spreadsheets/${getCurrentSheetId()}/values/HEURES_TA!A${sheetRow}:D${sheetRow}?valueInputOption=RAW`;
+          method = 'PUT';
+        } else {
+          // APPEND nouvelle ligne
+          writeUrl = `https://sheets.googleapis.com/v4/spreadsheets/${getCurrentSheetId()}/values/HEURES_TA!A:D:append?valueInputOption=RAW&insertDataOption=INSERT_ROWS`;
+          method = 'POST';
+        }
+
+        const writeRes = await fetch(writeUrl, {
+          method: method,
+          headers: {
+            'Authorization': `Bearer ${accessToken}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ values: [newRow] })
+        });
+        if (!writeRes.ok) {
+          const errText = await writeRes.text();
+          console.error('[HeuresTA] Erreur sauvegarde :', errText);
+        }
+      } catch (err) {
+        console.error('[HeuresTA] Erreur :', err);
+      }
+    }
+
+    async function fetchJoursFeries() {
+      // Charge les jours fériés depuis l'onglet JOURS_FERIES
+      try {
+        const url = `https://sheets.googleapis.com/v4/spreadsheets/${getCurrentSheetId()}/values/JOURS_FERIES!A:A?valueRenderOption=UNFORMATTED_VALUE&dateTimeRenderOption=SERIAL_NUMBER`;
+        const res = await fetch(url, { headers: { 'Authorization': `Bearer ${accessToken}` } });
+        if (!res.ok) {
+          console.warn('[JoursFeries] Onglet introuvable, ignoré');
+          joursFeries = [];
+          return;
+        }
+        const data = await res.json();
+        joursFeries = (data.values || [])
+          .map(r => r[0])
+          .filter(v => typeof v === 'number')
+          .map(serial => {
+            const d = serialToDate(serial);
+            return d ? d.getTime() : null;
+          })
+          .filter(t => t !== null);
+        console.log(`[JoursFeries] ${joursFeries.length} jours fériés chargés`);
+      } catch (err) {
+        console.warn('[JoursFeries] Erreur chargement:', err);
+        joursFeries = [];
+      }
+    }
+
+    function isJourFerie(date) {
+      if (!date) return false;
+      const t = (date instanceof Date) ? date.getTime() : null;
+      if (t === null) return false;
+      // Comparer uniquement la date (sans heure)
+      const dateOnly = new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
+      return joursFeries.includes(dateOnly);
+    }
+
+    function serialToDate(serial) {
+      if (typeof serial !== 'number') return null;
+      const baseDate = new Date(Date.UTC(1899, 11, 30));
+      const ms = serial * 86400 * 1000;
+      const d = new Date(baseDate.getTime() + ms);
+      return new Date(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
+    }
+
+    function dateToSerial(date) {
+      // Convertir Date JS → numéro série Sheets (jours depuis 30/12/1899)
+      const baseDate = new Date(Date.UTC(1899, 11, 30));
+      const dayMs = 86400 * 1000;
+      const utcDate = Date.UTC(date.getFullYear(), date.getMonth(), date.getDate());
+      return Math.round((utcDate - baseDate.getTime()) / dayMs);
+    }
+
+    // =====================================================
+    // RENDU PLANNING
+    // =====================================================
+    function renderPlanning() {
+      // Mettre à jour le menu de sélection de jour selon la semaine courante
+      updateDaySelector();
+      // Dispatcher selon le mode de vue
+      if (currentViewMode === 'day') {
+        renderPlanningDay();
+      } else {
+        renderPlanningWeek();
+      }
+    }
+
+    function updateDaySelector() {
+      const daySelect = document.getElementById('view-day-select');
+      daySelect.innerHTML = '';
+      if (!selectedMonday) return;
+      for (let i = 0; i < 6; i++) {
+        const d = new Date(selectedMonday);
+        d.setDate(selectedMonday.getDate() + i);
+        const opt = document.createElement('option');
+        opt.value = i;
+        const label = `${DAYS[i]} ${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}`;
+        opt.textContent = isJourFerie(d) ? `${label} 🚫` : label;
+        daySelect.appendChild(opt);
+      }
+      daySelect.value = currentViewDay;
+    }
+
+    // =====================================================
+    // VUE JOUR (1 jour, 3 TA en larges colonnes)
+    // =====================================================
+    function isFilRouge(row) {
+      // Une intervention est fil rouge si :
+      // - son ID commence par FR_ , OU
+      // - son forfait vaut FILROUGE
+      if (!row) return false;
+      const id = String(row[COL.ID] || '');
+      const forfait = String(row[COL.FORFAIT] || '').toUpperCase();
+      return id.startsWith(FILROUGE_ID_PREFIX) || forfait === FILROUGE_TAG;
+    }
+
+    function isUrgence(row) {
+      // Une urgence est identifiée par son ID préfixé URG_
+      if (!row) return false;
+      const id = String(row[COL.ID] || '');
+      return id.startsWith(URGENCE_ID_PREFIX);
+    }
+
+    function renderPlanningDay() {
+      const dayIdx = currentViewDay;
+      const date = new Date(selectedMonday);
+      date.setDate(selectedMonday.getDate() + dayIdx);
+      const fmt = (d) => `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}`;
+      document.getElementById('week-info').textContent = `${DAYS[dayIdx]} ${fmt(date)}`;
+
+      const isFerie = isJourFerie(date);
+
+      // Si jour férié, afficher juste un message
+      if (isFerie) {
+        document.getElementById('planning-content').innerHTML =
+          `<div class="loader" style="background: repeating-linear-gradient(45deg, #fee2e2, #fee2e2 10px, #fecaca 10px, #fecaca 20px); color: #991b1b; font-weight: 700; font-size: 16px; padding: 60px;">🚫 Jour férié - Atelier fermé</div>`;
+        return;
+      }
+
+      // Filtrer les interventions de ce jour (sauf fils rouges et urgences)
+      const dayInterventions = allInterventions.filter(row => {
+        if (isFilRouge(row) || isUrgence(row)) return false;
+        const rowDate = serialToDate(row[COL.DATE]);
+        if (!rowDate) return false;
+        return rowDate.getTime() === date.getTime();
+      });
+
+      // Construire l'index par TA
+      const grid = { TA1: [], TA2: [], TA3: [] };
+      dayInterventions.forEach(row => {
+        const ta = row[COL.TECHNICIEN] || 'TA1';
+        if (grid[ta]) grid[ta].push(row);
+      });
+
+      const slotsCount = (WORK_HOURS_END - WORK_HOURS_START) * 2;
+
+      // Calculer l'occupation pour ce jour
+      const occupation = {};
+      for (const ta of ['TA1', 'TA2', 'TA3']) {
+        grid[ta].forEach(row => {
+          const startSlot = (row[COL.ROW] || ROW_OFFSET) - ROW_OFFSET;
+          // Temps total = forfait + MOPA (col T). Fallback sur TEMPS_REEL si absent.
+          const tempsAffiche = Number(row[COL.TEMPS_TOTAL]) || Number(row[COL.TEMPS_REEL]) || 0.5;
+          const slotsNeeded = Math.ceil(tempsAffiche / SLOT_DURATION);
+          let placedSlots = 0;
+          let curSlot = startSlot;
+          // En vue jour, on ne montre que la partie du jour courant (pas le débordement)
+          while (placedSlots < slotsNeeded && curSlot < slotsCount) {
+            const h = WORK_HOURS_START + curSlot * 0.5;
+            if (h >= PAUSE_START && h < PAUSE_END) { curSlot++; continue; }
+            if (!occupation[curSlot]) occupation[curSlot] = {};
+            occupation[curSlot][ta] = { row: row, isStart: placedSlots === 0 };
+            placedSlots++; curSlot++;
+          }
+        });
+      }
+
+      // Générer le tableau (3 colonnes TA larges)
+      let html = '<table class="planning"><thead>';
+      html += '<tr><th class="day-header" style="width: 80px;">Heure</th>';
+      html += '<th class="ta-header ta1" style="font-size: 14px; padding: 12px;">TA1</th>';
+      html += '<th class="ta-header ta2" style="font-size: 14px; padding: 12px;">TA2</th>';
+      html += '<th class="ta-header ta3" style="font-size: 14px; padding: 12px;">TA3</th>';
+      html += '</tr></thead><tbody>';
+
+      for (let s = 0; s < slotsCount; s++) {
+        const h = WORK_HOURS_START + s * 0.5;
+        const hh = Math.floor(h); const mm = (h - hh) * 60;
+        const timeLabel = `${String(hh).padStart(2,'0')}:${String(mm).padStart(2,'0')}`;
+        const isPause = (h >= PAUSE_START && h < PAUSE_END);
+        html += `<tr><td class="hour-cell">${timeLabel}</td>`;
+        for (const ta of ['TA1', 'TA2', 'TA3']) {
+          if (isPause) { html += `<td class="pause" style="font-size: 12px; padding: 6px;">PAUSE DÉJEUNER</td>`; continue; }
+          const occ = occupation[s] && occupation[s][ta];
+          if (occ) {
+            const r = occ.row; const taClass = ta.toLowerCase();
+            const dataIdx = allInterventions.indexOf(r);
+            if (occ.isStart) {
+              const client = r[COL.CLIENT] || '—';
+              const forfait = r[COL.FORFAIT] || '';
+              const designation = r[COL.DESIGNATION] || '';
+              const vehicule = r[COL.VEHICULE] || '';
+              html += `<td class="occupied ${taClass}" style="padding: 8px; font-size: 13px;" data-idx="${dataIdx}" onclick="openInterventionModal(${dataIdx})">
+                <span class="client" style="font-size: 14px;">${escapeHtml(client)}</span>
+                <span class="forfait">${escapeHtml(forfait)}${designation ? ' - ' + escapeHtml(designation) : ''}</span>
+                ${vehicule ? `<span class="forfait">🚗 ${escapeHtml(vehicule)}</span>` : ''}
+              </td>`;
+            } else {
+              html += `<td class="occupied ${taClass} continuation" data-idx="${dataIdx}" onclick="openInterventionModal(${dataIdx})"></td>`;
+            }
+          } else {
+            html += `<td class="slot" style="height: 40px; min-width: 200px;" onclick="openAddForm({dayIdx:${dayIdx},ta:'${ta}',slot:${s}})"></td>`;
+          }
+        }
+        html += '</tr>';
+      }
+      html += '</tbody></table>';
+      document.getElementById('planning-content').innerHTML = html;
+    }
+
+    function renderPlanningWeek() {
+      const weekDates = [];
+      for (let i = 0; i < 6; i++) {
+        const d = new Date(selectedMonday); d.setDate(selectedMonday.getDate() + i);
+        weekDates.push(d);
+      }
+      const weekInterventions = allInterventions.filter(row => {
+        if (isFilRouge(row) || isUrgence(row)) return false;
+        const rowDate = serialToDate(row[COL.DATE]);
+        if (!rowDate) return false;
+        return weekDates.some(d => d.getTime() === rowDate.getTime());
+      });
+      const grid = {};
+      weekInterventions.forEach(row => {
+        const rowDate = serialToDate(row[COL.DATE]);
+        const dayIdx = weekDates.findIndex(d => d.getTime() === rowDate.getTime());
+        if (dayIdx === -1) return;
+        const ta = row[COL.TECHNICIEN] || 'TA1';
+        if (!grid[dayIdx]) grid[dayIdx] = { TA1: [], TA2: [], TA3: [] };
+        if (!grid[dayIdx][ta]) grid[dayIdx][ta] = [];
+        grid[dayIdx][ta].push(row);
+      });
+      const fmt = (d) => `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}`;
+      document.getElementById('week-info').textContent = `Semaine du ${fmt(weekDates[0])} au ${fmt(weekDates[5])}`;
+      const slotsCount = (WORK_HOURS_END - WORK_HOURS_START) * 2;
+      // Pré-calculer si chaque jour est férié
+      const daysFerie = weekDates.map(d => isJourFerie(d));
+      let html = '<table class="planning"><thead><tr><th class="day-header" rowspan="2">Heure</th>';
+      weekDates.forEach((d, i) => {
+        const ferieClass = daysFerie[i] ? ' ferie-header' : '';
+        html += `<th class="day-header${ferieClass}" colspan="3">${DAYS[i]}<br><span style="font-weight:400;font-size:11px;">${fmt(d)}</span></th>`;
+      });
+      html += '</tr><tr>';
+      for (let i = 0; i < 6; i++) {
+        html += `<th class="ta-header ta1">TA1</th><th class="ta-header ta2">TA2</th><th class="ta-header ta3">TA3</th>`;
+      }
+      html += '</tr></thead><tbody>';
+      const occupation = {};
+      // Placement avec gestion du débordement sur le jour suivant (même TA, J+1 ouvré max)
+      // Saute les jours fériés en cherchant le prochain jour ouvré
+      for (let dayIdx = 0; dayIdx < 6; dayIdx++) {
+        for (const ta of ['TA1', 'TA2', 'TA3']) {
+          const interventions = (grid[dayIdx] && grid[dayIdx][ta]) || [];
+          interventions.forEach(row => {
+            const startSlot = (row[COL.ROW] || ROW_OFFSET) - ROW_OFFSET;
+            // Temps total = forfait + MOPA (col T). Fallback sur TEMPS_REEL si absent.
+            const tempsAffiche = Number(row[COL.TEMPS_TOTAL]) || Number(row[COL.TEMPS_REEL]) || 0.5;
+            const slotsNeeded = Math.ceil(tempsAffiche / SLOT_DURATION);
+
+            let placedSlots = 0;
+            let curSlot = startSlot;
+            let curDay = dayIdx;
+            let dayChanges = 0;  // compteur de débordements (max 1 = J+1)
+
+            while (placedSlots < slotsNeeded) {
+              // Si on a dépassé la fin du jour courant
+              if (curSlot >= slotsCount) {
+                // On essaie de continuer le lendemain (ou jour ouvré suivant)
+                if (curDay >= 5) break;  // Samedi : on s'arrête (pas de débordement après samedi)
+                if (dayChanges >= 1) break;  // On a déjà débordé une fois (J+1 ouvré max)
+                // Chercher le prochain jour NON férié dans la semaine
+                let nextDay = curDay + 1;
+                while (nextDay <= 5 && daysFerie[nextDay]) {
+                  nextDay++;
+                }
+                if (nextDay > 5) break;  // Aucun jour ouvré disponible cette semaine
+                curDay = nextDay;
+                dayChanges++;
+                curSlot = 2;  // 09:00 le lendemain
+                continue;
+              }
+              const h = WORK_HOURS_START + curSlot * 0.5;
+              // Sauter la pause déjeuner
+              if (h >= PAUSE_START && h < PAUSE_END) { curSlot++; continue; }
+              // Si le jour de départ est férié, ne rien placer (l'intervention ne devrait pas être là)
+              if (daysFerie[curDay]) break;
+              // Placer l'intervention
+              if (!occupation[curSlot]) occupation[curSlot] = {};
+              if (!occupation[curSlot][curDay]) occupation[curSlot][curDay] = {};
+              occupation[curSlot][curDay][ta] = { row: row, isStart: placedSlots === 0 };
+              placedSlots++;
+              curSlot++;
+            }
+          });
+        }
+      }
+      for (let s = 0; s < slotsCount; s++) {
+        const h = WORK_HOURS_START + s * 0.5;
+        const hh = Math.floor(h); const mm = (h - hh) * 60;
+        const timeLabel = `${String(hh).padStart(2,'0')}:${String(mm).padStart(2,'0')}`;
+        const isPause = (h >= PAUSE_START && h < PAUSE_END);
+        html += `<tr><td class="hour-cell">${timeLabel}</td>`;
+        for (let dayIdx = 0; dayIdx < 6; dayIdx++) {
+          for (const ta of ['TA1', 'TA2', 'TA3']) {
+            // Jour férié : cellule grisée non cliquable
+            if (daysFerie[dayIdx]) {
+              html += `<td class="ferie">${(s === 0 && ta === 'TA2') ? 'FÉRIÉ' : ''}</td>`;
+              continue;
+            }
+            if (isPause) { html += `<td class="pause">PAUSE</td>`; continue; }
+            const occ = occupation[s] && occupation[s][dayIdx] && occupation[s][dayIdx][ta];
+            if (occ) {
+              const r = occ.row; const taClass = ta.toLowerCase();
+              const dataIdx = allInterventions.indexOf(r);
+              if (occ.isStart) {
+                const client = (r[COL.CLIENT] || '—').substring(0, 20);
+                const forfait = r[COL.FORFAIT] || '';
+                html += `<td class="occupied ${taClass}" data-idx="${dataIdx}" onclick="openInterventionModal(${dataIdx})"><span class="client">${escapeHtml(client)}</span><span class="forfait">${escapeHtml(forfait)}</span></td>`;
+              } else {
+                html += `<td class="occupied ${taClass} continuation" data-idx="${dataIdx}" onclick="openInterventionModal(${dataIdx})"></td>`;
+              }
+            } else {
+              // Cellule vide cliquable pour ajouter
+              html += `<td class="slot" onclick="openAddForm({dayIdx:${dayIdx},ta:'${ta}',slot:${s}})"></td>`;
+            }
+          }
+        }
+        html += '</tr>';
+      }
+      html += '</tbody></table>';
+      document.getElementById('planning-content').innerHTML = html;
+    }
+
+    function escapeHtml(str) {
+      if (str === null || str === undefined) return '';
+      return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    // =====================================================
+    // RÉCAP
+    // =====================================================
+    function renderRecap() {
+      const weekDates = [];
+      for (let i = 0; i < 6; i++) { const d = new Date(selectedMonday); d.setDate(selectedMonday.getDate() + i); weekDates.push(d); }
+      const weekInterventions = allInterventions.filter(row => {
+        const rowDate = serialToDate(row[COL.DATE]);
+        if (!rowDate) return false;
+        return weekDates.some(d => d.getTime() === rowDate.getTime());
+      });
+      const cumul = {
+        TOTAL: { heures: 0, ca: 0, caTC: 0, tempsPrev: 0, gainH: 0, gainE: 0 },
+        TA1: { heures: 0, ca: 0, caTC: 0, tempsPrev: 0, gainH: 0, gainE: 0 },
+        TA2: { heures: 0, ca: 0, caTC: 0, tempsPrev: 0, gainH: 0, gainE: 0 },
+        TA3: { heures: 0, ca: 0, caTC: 0, tempsPrev: 0, gainH: 0, gainE: 0 }
+      };
+      weekInterventions.forEach(r => {
+        const ta = r[COL.TECHNICIEN] || 'TA1';
+        const tempsTotal = Number(r[COL.TEMPS_TOTAL]) || 0;
+        const ca = Number(r[COL.CA_FORFAIT]) || 0;
+        const caTC = Number(r[COL.CA_TEMPS_COMPL]) || 0;
+        const tempsPrev = Number(r[COL.DUREE_PREVUE]) || 0;
+        const gainH = Number(r[COL.GAIN_H]) || 0;
+        const gainE = Number(r[COL.GAIN_E]) || 0;
+        ['TOTAL', ta].forEach(key => {
+          if (!cumul[key]) return;
+          cumul[key].heures += tempsTotal;
+          cumul[key].ca += ca;
+          cumul[key].caTC += caTC;
+          cumul[key].tempsPrev += tempsPrev;
+          cumul[key].gainH += gainH;
+          cumul[key].gainE += gainE;
+        });
+      });
+
+      // Récupérer les heures TA pour la semaine courante (avec héritage si non saisi)
+      heuresTaCurrent = getHeuresTaForCurrentWeek();
+      const heuresTotalDispo = heuresTaCurrent[0] + heuresTaCurrent[1] + heuresTaCurrent[2];
+
+      const fmtH = (n) => n.toFixed(1).replace('.', ',') + ' h';
+      const fmtE = (n) => n.toFixed(2).replace('.', ',') + ' €';
+      const fmtP = (n) => Math.round(n) + ' %';
+
+      // Carte TOTAL
+      const cTotal = cumul.TOTAL;
+      const txTotal = heuresTotalDispo > 0 ? (cTotal.heures / heuresTotalDispo * 100) : 0;
+      const totalCard = `<div class="recap-card global"><div class="recap-title">Total semaine</div>` +
+        `<div class="recap-row"><span class="label">Heures réalisées</span><span class="value">${fmtH(cTotal.heures)}</span></div>` +
+        `<div class="recap-row"><span class="label">Heures dispo</span><span class="value">${fmtH(heuresTotalDispo)}</span></div>` +
+        `<div class="recap-row"><span class="label">CA forfait</span><span class="value">${fmtE(cTotal.ca)}</span></div>` +
+        `<div class="recap-row"><span class="label">CA temps compl.</span><span class="value">${fmtE(cTotal.caTC)}</span></div>` +
+        `<div class="recap-row"><span class="label">Temps prévu</span><span class="value">${fmtH(cTotal.tempsPrev)}</span></div>` +
+        `<div class="recap-row"><span class="label">Gain prod. (h)</span><span class="value">${fmtH(cTotal.gainH)}</span></div>` +
+        `<div class="recap-row"><span class="label">Gain prod. (€)</span><span class="value">${fmtE(cTotal.gainE)}</span></div>` +
+        `<div class="recap-row"><span class="label">Tx occupation</span><span class="value">${fmtP(txTotal)}</span></div></div>`;
+
+      // Cartes TA (avec champ heures dispo éditable + masquage si 0h)
+      const buildTaCard = (taKey, taIdx, taClass) => {
+        const c = cumul[taKey];
+        const heuresDispo = heuresTaCurrent[taIdx] || 0;
+        // Si heures dispo = 0, on masque la carte
+        if (heuresDispo === 0) return '';
+        const tx = heuresDispo > 0 ? (c.heures / heuresDispo * 100) : 0;
+        return `<div class="recap-card ${taClass}">` +
+          `<div class="recap-title">${taKey}</div>` +
+          `<div class="recap-row"><span class="label">Heures réalisées</span><span class="value">${fmtH(c.heures)}</span></div>` +
+          `<div class="recap-row recap-row-edit"><span class="label">Heures dispo</span>` +
+            `<input type="number" class="recap-heures-input" data-ta="${taIdx}" value="${heuresDispo}" min="0" max="60" step="0.5" />` +
+          `</div>` +
+          `<div class="recap-row"><span class="label">CA forfait</span><span class="value">${fmtE(c.ca)}</span></div>` +
+          `<div class="recap-row"><span class="label">CA temps compl.</span><span class="value">${fmtE(c.caTC)}</span></div>` +
+          `<div class="recap-row"><span class="label">Temps prévu</span><span class="value">${fmtH(c.tempsPrev)}</span></div>` +
+          `<div class="recap-row"><span class="label">Gain prod. (h)</span><span class="value">${fmtH(c.gainH)}</span></div>` +
+          `<div class="recap-row"><span class="label">Gain prod. (€)</span><span class="value">${fmtE(c.gainE)}</span></div>` +
+          `<div class="recap-row"><span class="label">Tx occupation</span><span class="value">${fmtP(tx)}</span></div></div>`;
+      };
+
+      document.getElementById('recap-grid').innerHTML =
+        totalCard +
+        buildTaCard('TA1', 0, 'ta1') +
+        buildTaCard('TA2', 1, 'ta2') +
+        buildTaCard('TA3', 2, 'ta3');
+      document.getElementById('recap-section').classList.remove('hidden');
+
+      // Brancher les listeners sur les inputs heures dispo
+      document.querySelectorAll('.recap-heures-input').forEach(input => {
+        input.addEventListener('change', onHeuresTaChanged);
+        input.addEventListener('blur', onHeuresTaChanged);
+      });
+    }
+
+    // Handler du changement d'heures dispo TA
+    async function onHeuresTaChanged(e) {
+      const taIdx = parseInt(e.target.dataset.ta);
+      const newVal = Number(e.target.value);
+      if (isNaN(taIdx) || isNaN(newVal) || newVal < 0) return;
+      // Si pas de changement, ne rien faire
+      if (heuresTaCurrent[taIdx] === newVal) return;
+      heuresTaCurrent[taIdx] = newVal;
+      // Sauvegarder dans Sheets
+      await saveHeuresTaForCurrentWeek(heuresTaCurrent);
+      // Re-rendre le récap pour mettre à jour les taux
+      renderRecap();
+    }
+
+    // =====================================================
+    // MODALE DÉTAILS
+    // =====================================================
+    function openInterventionModal(dataIdx) {
+      const r = allInterventions[dataIdx];
+      if (!r) return;
+      const fmtE = (n) => (Number(n) || 0).toFixed(2).replace('.', ',') + ' €';
+      const fmtH = (n) => (Number(n) || 0).toFixed(1).replace('.', ',') + ' h';
+      const date = serialToDate(r[COL.DATE]);
+      const dateStr = date ? `${String(date.getDate()).padStart(2,'0')}/${String(date.getMonth()+1).padStart(2,'0')}/${date.getFullYear()}` : '—';
+      const rows = [
+        ['Date', dateStr],
+        ['Client', r[COL.CLIENT] || '—'],
+        ['N° client', r[COL.NUM_CLIENT] || '—'],
+        ['Téléphone', r[COL.TEL] || '—'],
+        ['Email', r[COL.EMAIL] || '—'],
+        ['Technicien', r[COL.TECHNICIEN] || '—'],
+        ['Forfait', `${r[COL.FORFAIT] || ''} ${r[COL.DESIGNATION] ? '— ' + r[COL.DESIGNATION] : ''}`],
+        ['Intervenant', r[COL.INTERVENANT] || '—'],
+        ['Temps réel', fmtH(r[COL.TEMPS_REEL])],
+        ['Temps compl.', fmtH(r[COL.TEMPS_COMPL])],
+        ['Réf. MOPA', r[COL.REF_MOPA] || '—'],
+        ['CA forfait', fmtE(r[COL.CA_FORFAIT])],
+        ['CA temps compl.', fmtE(r[COL.CA_TEMPS_COMPL])],
+        ['Véhicule', r[COL.VEHICULE] || '—'],
+        ['Immat.', r[COL.IMMAT] || '—'],
+        ['Km', r[COL.KM] || '—'],
+        ['Carte fidélité', r[COL.FIDELITE] || '—'],
+        ['FPPEC2', r[COL.FPPEC2] || '—'],
+        ['Commentaire', r[COL.COMMENTAIRE] || '—']
+      ];
+      const html = rows.map(([k, v]) =>
+        `<div class="modal-row"><span class="label">${k}</span><span class="value">${escapeHtml(String(v))}</span></div>`
+      ).join('');
+      document.getElementById('modal-title').textContent = r[COL.CLIENT] || 'Intervention';
+      document.getElementById('modal-content').innerHTML = html;
+      // Stocker l'index pour les actions Modifier / Supprimer
+      document.getElementById('modal').dataset.idx = dataIdx;
+      // Activer/désactiver les boutons Appeler/Mail selon les données disponibles
+      const btnCall = document.getElementById('btn-call-intervention');
+      const btnMail = document.getElementById('btn-mail-intervention');
+      if ((r[COL.TEL] || '').trim()) {
+        btnCall.disabled = false;
+        btnCall.title = 'Appeler ' + r[COL.TEL];
+      } else {
+        btnCall.disabled = true;
+        btnCall.title = 'Pas de téléphone enregistré';
+      }
+      // Le mail peut toujours s'envoyer (l'utilisateur peut saisir manuellement)
+      if ((r[COL.EMAIL] || '').trim()) {
+        btnMail.title = 'Envoyer à ' + r[COL.EMAIL];
+      } else {
+        btnMail.title = 'Demandera l\'email du client';
+      }
+      document.getElementById('modal').classList.remove('hidden');
+    }
+
+    function closeModal() { document.getElementById('modal').classList.add('hidden'); }
+
+    // =====================================================
+    // FORMULAIRE D'AJOUT
+    // =====================================================
+    async function openAddForm(context) {
+      if (!selectedMonday) {
+        alert('Sélectionnez d\'abord une semaine dans le calendrier');
+        return;
+      }
+
+      // Charger l'assortiment si pas encore en cache
+      if (assortiment.length === 0) {
+        try {
+          showFormFeedback('Chargement des forfaits...', 'info');
+          await fetchAssortiment();
+        } catch (err) {
+          alert('Impossible de charger la liste des forfaits : ' + err.message);
+          return;
+        }
+      }
+
+      currentEditContext = context;
+
+      // Remplir le menu Date avec les 6 jours de la semaine
+      const dateSelect = document.getElementById('f-date');
+      dateSelect.innerHTML = '';
+      for (let i = 0; i < 6; i++) {
+        const d = new Date(selectedMonday); d.setDate(selectedMonday.getDate() + i);
+        const opt = document.createElement('option');
+        opt.value = i;
+        const dateLabel = `${DAYS[i]} ${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}`;
+        if (isJourFerie(d)) {
+          opt.textContent = `${dateLabel} 🚫 FÉRIÉ`;
+          opt.disabled = true;
+          opt.style.color = '#991b1b';
+        } else {
+          opt.textContent = dateLabel;
+        }
+        dateSelect.appendChild(opt);
+      }
+
+      // Remplir le menu Heure (08:00 → 17:30 sauf 12:00 et 12:30)
+      const heureSelect = document.getElementById('f-heure');
+      heureSelect.innerHTML = '';
+      const slotsCount = (WORK_HOURS_END - WORK_HOURS_START) * 2;
+      for (let s = 0; s < slotsCount; s++) {
+        const h = WORK_HOURS_START + s * 0.5;
+        if (h >= PAUSE_START && h < PAUSE_END) continue;
+        const hh = Math.floor(h); const mm = (h - hh) * 60;
+        const label = `${String(hh).padStart(2,'0')}:${String(mm).padStart(2,'0')}`;
+        const opt = document.createElement('option');
+        opt.value = s; opt.textContent = label;
+        heureSelect.appendChild(opt);
+      }
+
+      // Remplir le menu Forfait
+      const forfaitSelect = document.getElementById('f-forfait');
+      forfaitSelect.innerHTML = '<option value="">— Choisir un forfait —</option>';
+      assortiment.forEach(f => {
+        const opt = document.createElement('option');
+        opt.value = f.code;
+        opt.textContent = `${f.code}${f.designation ? ' - ' + f.designation : ''}`;
+        forfaitSelect.appendChild(opt);
+      });
+
+      // Pré-remplir depuis le contexte (si clic sur cellule)
+      if (context) {
+        dateSelect.value = context.dayIdx;
+        document.getElementById('f-technicien').value = context.ta;
+        heureSelect.value = context.slot;
+      } else {
+        dateSelect.value = 0;
+        document.getElementById('f-technicien').value = 'TA1';
+        heureSelect.value = 2; // 09:00 par défaut
+      }
+
+      // Réinitialiser les champs
+      document.getElementById('f-duree').value = '';
+      document.getElementById('f-client').value = '';
+      document.getElementById('f-numClient').value = '';
+      document.getElementById('f-tel').value = '';
+      document.getElementById('f-email').value = '';
+      document.getElementById('f-vehicule').value = '';
+      document.getElementById('f-immat').value = '';
+      document.getElementById('f-km').value = '';
+      document.getElementById('f-fidelite').value = 'NON';
+      document.getElementById('f-intervenant').value = '';
+      document.getElementById('f-fppec2').value = 'NON';
+      document.getElementById('f-commentaire').value = '';
+      document.getElementById('f-mopa').value = '';
+      document.getElementById('f-tcHeures').value = '0';
+      document.getElementById('form-feedback').className = 'form-feedback';
+      document.getElementById('form-feedback').textContent = '';
+
+      // Si mode édition : pré-remplir tous les champs depuis l'intervention existante
+      if (editingDataIdx !== null && allInterventions[editingDataIdx]) {
+        const r = allInterventions[editingDataIdx];
+        // Trouver le dayIdx (par rapport à selectedMonday)
+        const interventionDate = serialToDate(r[COL.DATE]);
+        if (interventionDate) {
+          for (let i = 0; i < 6; i++) {
+            const d = new Date(selectedMonday); d.setDate(selectedMonday.getDate() + i);
+            if (d.getTime() === interventionDate.getTime()) {
+              dateSelect.value = i;
+              break;
+            }
+          }
+        }
+        // TA
+        document.getElementById('f-technicien').value = r[COL.TECHNICIEN] || 'TA1';
+        // Heure (depuis ROW)
+        const slotFromRow = (Number(r[COL.ROW]) || ROW_OFFSET) - ROW_OFFSET;
+        // Vérifier que ce slot existe dans le menu (sinon prendre le plus proche)
+        const heureOptions = Array.from(heureSelect.options).map(o => parseInt(o.value));
+        if (heureOptions.includes(slotFromRow)) {
+          heureSelect.value = slotFromRow;
+        } else {
+          heureSelect.value = heureOptions[0];
+        }
+        // Autres champs
+        document.getElementById('f-duree').value = r[COL.TEMPS_REEL] || '';
+        document.getElementById('f-client').value = r[COL.CLIENT] || '';
+        document.getElementById('f-numClient').value = r[COL.NUM_CLIENT] || '';
+        document.getElementById('f-tel').value = r[COL.TEL] || '';
+        document.getElementById('f-email').value = r[COL.EMAIL] || '';
+        document.getElementById('f-forfait').value = r[COL.FORFAIT] || '';
+        document.getElementById('f-vehicule').value = r[COL.VEHICULE] || '';
+        document.getElementById('f-immat').value = r[COL.IMMAT] || '';
+        document.getElementById('f-km').value = r[COL.KM] || '';
+        document.getElementById('f-fidelite').value = (r[COL.FIDELITE] === 'OUI') ? 'OUI' : 'NON';
+        document.getElementById('f-intervenant').value = r[COL.INTERVENANT] || '';
+        document.getElementById('f-fppec2').value = (r[COL.FPPEC2] === 'OUI') ? 'OUI' : 'NON';
+        document.getElementById('f-commentaire').value = r[COL.COMMENTAIRE] || '';
+        // Pré-remplir le temps complémentaire si présent
+        const refMopa = (r[COL.REF_MOPA] || '').toString().trim();
+        const tcHeures = Number(r[COL.TEMPS_COMPL]) || 0;
+        // updateForfaitInfo() va régénérer le sélecteur MOPA, on positionne après
+        document.getElementById('f-tcHeures').value = tcHeures;
+        // On stockera la valeur souhaitée pour la restaurer après refreshMopaSelect
+        document.getElementById('f-mopa').dataset.preselect = refMopa;
+        // Adapter le titre et les boutons
+        document.querySelector('#form-modal h3').textContent = '✏️ Modifier l\'intervention';
+        document.getElementById('btn-submit-form').textContent = '✅ Enregistrer';
+        document.getElementById('btn-submit-and-add').style.display = 'none';
+      } else {
+        document.querySelector('#form-modal h3').textContent = '➕ Nouvelle intervention';
+        document.getElementById('btn-submit-form').textContent = '✅ Valider';
+        document.getElementById('btn-submit-and-add').style.display = 'inline-block';
+      }
+
+      updateForfaitInfo();
+      document.getElementById('form-modal').classList.remove('hidden');
+      // Focus sur le champ Client
+      setTimeout(() => document.getElementById('f-client').focus(), 100);
+    }
+
+    function closeAddForm() {
+      document.getElementById('form-modal').classList.add('hidden');
+      currentEditContext = null;
+      editingDataIdx = null;
+    }
+
+    function editIntervention(dataIdx) {
+      // Fermer la modale détails et ouvrir le formulaire en mode édition
+      closeModal();
+      editingDataIdx = dataIdx;
+      openAddForm(null);
+    }
+
+    function updateForfaitInfo() {
+      const code = document.getElementById('f-forfait').value;
+      const fidelite = document.getElementById('f-fidelite').value;
+      const info = document.getElementById('f-forfait-info');
+      if (!code) {
+        info.textContent = 'Prix : — • Durée : —';
+        refreshMopaSelect('');
+        return;
+      }
+      const f = assortiment.find(x => x.code === code);
+      if (!f) {
+        info.textContent = 'Forfait introuvable';
+        refreshMopaSelect('');
+        return;
+      }
+      const remise = (fidelite === 'OUI') ? 0.9 : 1;
+      const prix = (f.prix * remise).toFixed(2).replace('.', ',');
+      info.textContent = `Prix : ${prix} € • Durée : ${f.duree} h`;
+      // Rafraîchir le sélecteur MOPA selon le forfait choisi
+      refreshMopaSelect(code);
+    }
+
+    // Filtre les MOPAs selon le code forfait (ex: FP04 → MOPA04 + "Aucun")
+    // Si pas de correspondance trouvée, on propose tous les MOPAs disponibles
+    function refreshMopaSelect(forfaitCode) {
+      const select = document.getElementById('f-mopa');
+      if (!select) return;
+      const currentValue = select.value;
+      // Vider et reconstruire
+      select.innerHTML = '<option value="">— Aucun —</option>';
+
+      // Extraire le numéro du code forfait : FP04 -> "04", FP104 -> "104"
+      let mopaTarget = '';
+      if (forfaitCode) {
+        const m = forfaitCode.match(/^FP(\d+)$/i);
+        if (m) mopaTarget = 'MOPA' + m[1];
+      }
+
+      // Filtre prioritaire : MOPA correspondant au forfait
+      const matched = mopaTarget ? mopas.find(mp => mp.code.toUpperCase() === mopaTarget.toUpperCase()) : null;
+      if (matched) {
+        const opt = document.createElement('option');
+        opt.value = matched.code;
+        opt.textContent = `${matched.code} (${matched.prixParH.toFixed(2).replace('.', ',')} €/h)`;
+        select.appendChild(opt);
+      } else if (forfaitCode) {
+        // Pas de correspondance directe, mais on propose tous les MOPAs en fallback
+        mopas.forEach(mp => {
+          const opt = document.createElement('option');
+          opt.value = mp.code;
+          opt.textContent = `${mp.code} (${mp.prixParH.toFixed(2).replace('.', ',')} €/h)`;
+          select.appendChild(opt);
+        });
+      }
+
+      // Conserver la valeur si toujours présente (en priorité depuis dataset.preselect en mode édition)
+      const preselect = select.dataset.preselect;
+      if (preselect && Array.from(select.options).some(o => o.value === preselect)) {
+        select.value = preselect;
+        delete select.dataset.preselect;
+      } else if (currentValue && Array.from(select.options).some(o => o.value === currentValue)) {
+        select.value = currentValue;
+      }
+      updateTcSummary();
+    }
+
+    // Met à jour le résumé du temps complémentaire (CA, PFA, recyclage)
+    function updateTcSummary() {
+      const summary = document.getElementById('f-tc-summary');
+      if (!summary) return;
+      const mopaCode = document.getElementById('f-mopa').value;
+      const heures = Number(document.getElementById('f-tcHeures').value) || 0;
+
+      if (!mopaCode || heures <= 0) {
+        summary.className = 'tc-summary empty';
+        summary.textContent = 'Sélectionnez un MOPA et saisissez des heures pour voir le tarif';
+        return;
+      }
+      const mp = mopas.find(x => x.code === mopaCode);
+      if (!mp) {
+        summary.className = 'tc-summary empty';
+        summary.textContent = 'MOPA introuvable';
+        return;
+      }
+      const ca = heures * mp.prixParH;
+      const pfa = heures * mp.pfa;
+      const recy = heures * mp.recyclage;
+      const fmtE = (n) => n.toFixed(2).replace('.', ',');
+      summary.className = 'tc-summary active';
+      summary.innerHTML = `
+        <div class="tc-amount">→ CA temps compl. : ${fmtE(ca)} €</div>
+        <div class="tc-detail">PFA : ${fmtE(pfa)} € • Recyclage : ${fmtE(recy)} €</div>
+      `;
+    }
+
+    function showFormFeedback(msg, type) {
+      const el = document.getElementById('form-feedback');
+      el.textContent = msg;
+      el.className = `form-feedback ${type}`;
+    }
+
+    async function submitForm(andAdd) {
+      // andAdd = true : après succès, garde le formulaire ouvert avec client/véhicule conservés
+      //                 et heure de début pré-remplie après la fin de cette intervention
+      // andAdd = false : ferme le formulaire et rafraîchit
+      andAdd = !!andAdd;
+      // En mode édition, on ne propose pas le multi-forfaits (ça créerait une nouvelle intervention)
+      if (editingDataIdx !== null) andAdd = false;
+      const submitBtn = document.getElementById('btn-submit-form');
+      submitBtn.disabled = true;
+      submitBtn.textContent = '⏳ Enregistrement...';
+
+      try {
+        // Récupérer les valeurs du formulaire
+        const dayIdx = parseInt(document.getElementById('f-date').value);
+        const technicien = document.getElementById('f-technicien').value;
+        const slotStart = parseInt(document.getElementById('f-heure').value);
+        const dureeInput = document.getElementById('f-duree').value;
+        const client = document.getElementById('f-client').value.trim();
+        const forfaitCode = document.getElementById('f-forfait').value;
+
+        // Validation
+        if (!client) throw new Error('Le client est obligatoire');
+        if (!forfaitCode) throw new Error('Le forfait est obligatoire');
+
+        const forfaitData = assortiment.find(f => f.code === forfaitCode);
+        if (!forfaitData) throw new Error('Forfait introuvable dans ASSORTIMENT');
+
+        const dureePrevue = forfaitData.duree;
+        const tempsReel = dureeInput ? Number(dureeInput) : dureePrevue;
+        if (!tempsReel || tempsReel <= 0) throw new Error('Durée invalide');
+
+        // Calculer la date
+        const date = new Date(selectedMonday);
+        date.setDate(selectedMonday.getDate() + dayIdx);
+        const dateSerial = dateToSerial(date);
+
+        // Bloquer la planification les jours fériés
+        if (isJourFerie(date)) {
+          throw new Error('🚫 Impossible de planifier une intervention un jour férié.\n\nMerci de choisir une autre date.');
+        }
+
+        // Calculer la ligne du Sheet
+        const rowSheet = ROW_OFFSET + slotStart;
+
+        // Calculer la colonne du Sheet (selon TA et jour)
+        const colSheet = DAY_COL_MAP[dayIdx][technicien];
+
+        // Calculs financiers
+        const fideliteOui = document.getElementById('f-fidelite').value === 'OUI';
+        const fppec2Oui = document.getElementById('f-fppec2').value === 'OUI';
+        const caForfait = fideliteOui ? Math.round(forfaitData.prix * 0.9 * 100) / 100 : forfaitData.prix;
+        const prixNetFinal = fideliteOui ? Math.round(forfaitData.prixNet * 0.9 * 100) / 100 : forfaitData.prixNet;
+        const gainH = Math.max(0, Math.round((dureePrevue - tempsReel) * 100) / 100);
+        const gainE = Math.round(gainH * (caForfait / (dureePrevue || 1)) * 100) / 100;
+        const caFppec2 = fppec2Oui ? FPPEC2_PRIX : 0;
+
+        // Calculs Temps Complémentaire (MOPA)
+        const refMopaCode = document.getElementById('f-mopa').value || '';
+        const tcHeures = Number(document.getElementById('f-tcHeures').value) || 0;
+        let tcCa = 0, tcPfa = 0, tcRecyclage = 0;
+        if (refMopaCode && tcHeures > 0) {
+          const mp = mopas.find(x => x.code === refMopaCode);
+          if (mp) {
+            tcCa = Math.round(tcHeures * mp.prixParH * 100) / 100;
+            tcPfa = Math.round(tcHeures * mp.pfa * 100) / 100;
+            tcRecyclage = Math.round(tcHeures * mp.recyclage * 100) / 100;
+          }
+        }
+        const tempsTotal = tempsReel + tcHeures;  // Total = forfait + temps compl
+
+        // Construire la ligne (33 colonnes A → AG)
+        // Si édition : on garde l'ID original, sinon on en génère un nouveau
+        const isEditing = (editingDataIdx !== null);
+        const id = isEditing
+          ? (allInterventions[editingDataIdx][COL.ID] || generateUUID())
+          : generateUUID();
+        const newRow = [
+          id,                                                 // A : ID
+          dateSerial,                                         // B : Date
+          rowSheet,                                           // C : Row
+          colSheet,                                           // D : Col
+          client,                                             // E : Client
+          document.getElementById('f-numClient').value || '', // F
+          document.getElementById('f-tel').value || '',       // G
+          forfaitCode,                                        // H : Forfait
+          forfaitData.designation,                            // I : Désignation
+          tempsReel,                                          // J : Temps réel
+          tcHeures,                                           // K : Temps complémentaire
+          document.getElementById('f-intervenant').value || '', // L
+          fideliteOui ? 'OUI' : 'NON',                        // M : Fidélité
+          document.getElementById('f-commentaire').value || '', // N
+          caForfait,                                          // O : CA forfait
+          forfaitData.pfa,                                    // P : Dont PFA
+          forfaitData.recyclage,                              // Q : Dont recyclage
+          prixNetFinal,                                       // R : Prix net forfait
+          dureePrevue,                                        // S : Durée prévue
+          tempsTotal,                                         // T : Temps total
+          gainH,                                              // U : Gain prod h
+          gainE,                                              // V : Gain prod €
+          document.getElementById('f-km').value || '',        // W : Km
+          document.getElementById('f-vehicule').value || '',  // X : Véhicule
+          document.getElementById('f-immat').value || '',     // Y : Immat
+          fppec2Oui ? 'OUI' : 'NON',                          // Z : FPPEC2
+          caFppec2,                                           // AA : CA FPPEC2
+          refMopaCode,                                        // AB : Réf MOPA
+          tcCa,                                               // AC : CA temps compl
+          tcPfa,                                              // AD : PFA temps compl
+          tcRecyclage,                                        // AE : Recyclage temps compl
+          0,                                                  // AF : MOPA PFA (réservé fil rouge couleur)
+          technicien,                                         // AG : Technicien
+          document.getElementById('f-email').value.trim() || '' // AH : Email
+        ];
+
+        showFormFeedback('💾 Écriture dans le Sheets...', 'info');
+
+        let url, method;
+        if (isEditing) {
+          // UPDATE : la ligne dans le Sheet correspond à dataIdx + 2 (en-tête en ligne 1)
+          const rowInSheet = editingDataIdx + 2;
+          url = `https://sheets.googleapis.com/v4/spreadsheets/${getCurrentSheetId()}/values/DONNEES_OK!A${rowInSheet}:AH${rowInSheet}?valueInputOption=RAW`;
+          method = 'PUT';
+        } else {
+          url = `https://sheets.googleapis.com/v4/spreadsheets/${getCurrentSheetId()}/values/DONNEES_OK!A:AH:append?valueInputOption=RAW&insertDataOption=INSERT_ROWS`;
+          method = 'POST';
+        }
+
+        const res = await fetch(url, {
+          method: method,
+          headers: {
+            'Authorization': `Bearer ${accessToken}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ values: [newRow] })
+        });
+
+        if (!res.ok) {
+          const errText = await res.text();
+          throw new Error(`HTTP ${res.status} : ${errText}`);
+        }
+
+        showFormFeedback(isEditing ? '✅ Intervention modifiée !' : '✅ Intervention ajoutée !', 'success');
+
+        // Rafraîchir le planning
+        if (andAdd && !isEditing) {
+          // Mode "ajouter un autre forfait" : on garde le formulaire ouvert
+          // et on pré-remplit certains champs pour gagner du temps
+          // Calculer la nouvelle heure de début = heure courante + temps total (forfait + MOPA)
+          const dureeBlocVisuel = tempsReel + tcHeures;
+          const newSlot = slotStart + Math.ceil(dureeBlocVisuel / SLOT_DURATION);
+          // S'assurer que le slot existe dans le menu (saute la pause)
+          const heureSelect = document.getElementById('f-heure');
+          const heureOptions = Array.from(heureSelect.options).map(o => parseInt(o.value));
+          let nextSlot = newSlot;
+          // Si le slot suivant n'existe pas (passe sur la pause), prendre le suivant disponible
+          while (!heureOptions.includes(nextSlot) && nextSlot < heureOptions[heureOptions.length - 1]) {
+            nextSlot++;
+          }
+          if (heureOptions.includes(nextSlot)) {
+            heureSelect.value = nextSlot;
+          }
+
+          // Vider uniquement Forfait + Durée pour saisir le 2e forfait
+          document.getElementById('f-forfait').value = '';
+          document.getElementById('f-duree').value = '';
+          updateForfaitInfo();
+
+          // Réactiver le bouton et focus sur le forfait
+          submitBtn.disabled = false;
+          submitBtn.textContent = '✅ Valider';
+          document.getElementById('btn-submit-and-add').disabled = false;
+
+          // Recharger les interventions en arrière-plan pour que le 2e forfait
+          // s'affiche bien sans conflit visuel quand on validera
+          await fetchAllInterventions();
+
+          // Focus sur le forfait
+          setTimeout(() => document.getElementById('f-forfait').focus(), 100);
+        } else {
+          setTimeout(async () => {
+            closeAddForm();
+            await loadAndRender(true);
+          }, 800);
+        }
+
+      } catch (err) {
+        console.error('Erreur sauvegarde:', err);
+        showFormFeedback('❌ ' + err.message, 'error');
+      } finally {
+        // Si on n'est pas en mode "andAdd réussi", restaurer le bouton
+        if (!andAdd || editingDataIdx !== null) {
+          submitBtn.disabled = false;
+          submitBtn.textContent = (editingDataIdx !== null) ? '✅ Enregistrer' : '✅ Valider';
+        }
+      }
+    }
+
+    // =====================================================
+    // RECHERCHE CLIENT (par nom)
+    // =====================================================
+    function performSearch(query) {
+      const resultsBox = document.getElementById('search-results');
+      const list = document.getElementById('search-results-list');
+      const countEl = document.getElementById('search-results-count');
+
+      // Si requête trop courte ou vide : on cache
+      if (!query || query.length < 2) {
+        resultsBox.classList.add('hidden');
+        return;
+      }
+
+      // Recherche insensible à la casse et aux accents
+      const queryNormalized = removeAccents(query.toLowerCase());
+
+      const matches = allInterventions
+        .map((row, idx) => ({ row, idx }))
+        .filter(({ row }) => {
+          const client = removeAccents((row[COL.CLIENT] || '').toLowerCase());
+          return client.includes(queryNormalized);
+        })
+        // Tri : plus récent en premier
+        .sort((a, b) => {
+          const dateA = Number(a.row[COL.DATE]) || 0;
+          const dateB = Number(b.row[COL.DATE]) || 0;
+          return dateB - dateA;
+        });
+
+      resultsBox.classList.remove('hidden');
+
+      if (matches.length === 0) {
+        countEl.textContent = 'Aucun résultat';
+        list.innerHTML = '<div class="search-result-empty">Aucune intervention trouvée pour ce client</div>';
+        return;
+      }
+
+      countEl.textContent = `${matches.length} résultat${matches.length > 1 ? 's' : ''}`;
+
+      // Construire la liste des résultats
+      let html = '';
+      matches.forEach(({ row, idx }) => {
+        const client = row[COL.CLIENT] || '—';
+        const forfait = row[COL.FORFAIT] || '';
+        const designation = row[COL.DESIGNATION] || '';
+        const ta = row[COL.TECHNICIEN] || 'TA1';
+        const taClass = ta.toLowerCase();
+
+        // Date formatée
+        const date = serialToDate(row[COL.DATE]);
+        const dateStr = date
+          ? `${String(date.getDate()).padStart(2,'0')}/${String(date.getMonth()+1).padStart(2,'0')}/${date.getFullYear()}`
+          : '—';
+
+        // Heure depuis ROW
+        const slotIdx = (Number(row[COL.ROW]) || ROW_OFFSET) - ROW_OFFSET;
+        const heureNum = WORK_HOURS_START + slotIdx * 0.5;
+        const hh = Math.floor(heureNum);
+        const mm = (heureNum - hh) * 60;
+        const heureStr = `${String(hh).padStart(2,'0')}:${String(mm).padStart(2,'0')}`;
+
+        const vehicule = row[COL.VEHICULE] || '';
+        const immat = row[COL.IMMAT] || '';
+        const tempsReel = Number(row[COL.TEMPS_REEL]) || 0;
+
+        html += `
+          <div class="search-result-item" onclick="navigateToIntervention(${idx})">
+            <span class="search-result-ta ${taClass}">${ta}</span>
+            <div class="search-result-content">
+              <div class="search-result-name">${escapeHtml(client)}</div>
+              <div class="search-result-details">
+                <span>📅 ${dateStr} ${heureStr}</span>
+                ${forfait ? `<span>🔧 ${escapeHtml(forfait)}${designation ? ' - ' + escapeHtml(designation) : ''}</span>` : ''}
+                ${tempsReel ? `<span>⏱️ ${String(tempsReel).replace('.', ',')} h</span>` : ''}
+                ${vehicule || immat ? `<span>🚗 ${escapeHtml(vehicule)}${immat ? ' (' + escapeHtml(immat) + ')' : ''}</span>` : ''}
+              </div>
+            </div>
+          </div>
+        `;
+      });
+      list.innerHTML = html;
+    }
+
+    function removeAccents(str) {
+      return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    }
+
+    function navigateToIntervention(dataIdx) {
+      const row = allInterventions[dataIdx];
+      if (!row) return;
+
+      // Naviguer vers la semaine de cette intervention
+      const date = serialToDate(row[COL.DATE]);
+      if (date) {
+        const dayOfWeek = (date.getDay() + 6) % 7;
+        const monday = new Date(date);
+        monday.setDate(date.getDate() - dayOfWeek);
+        monday.setHours(0, 0, 0, 0);
+        displayedMonth = new Date(monday);
+        displayedMonth.setDate(1);
+        selectWeek(monday);
+      }
+
+      // Ouvrir la modale détails après un court délai (le temps du rendu)
+      setTimeout(() => {
+        openInterventionModal(dataIdx);
+      }, 200);
+    }
+
+    // =====================================================
+    // STATS MENSUELLES
+    // =====================================================
+    let statsChart = null;
+    let statsByMonth = {};  // Cache des stats par mois (clé: 'YYYY-MM')
+
+    function computeMonthlyStats() {
+      // Calcule les agrégats par mois pour TOUTES les interventions
+      const stats = {};
+
+      allInterventions.forEach(row => {
+        const date = serialToDate(row[COL.DATE]);
+        if (!date) return;
+        const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+        if (!stats[key]) {
+          stats[key] = {
+            year: date.getFullYear(),
+            month: date.getMonth(),
+            count: 0,
+            heures: 0,
+            ca: 0,
+            caTC: 0,
+            gainH: 0,
+            gainE: 0,
+            byTA: { TA1: { count: 0, heures: 0, ca: 0 }, TA2: { count: 0, heures: 0, ca: 0 }, TA3: { count: 0, heures: 0, ca: 0 } }
+          };
+        }
+        const s = stats[key];
+        s.count += 1;
+        s.heures += Number(row[COL.TEMPS_TOTAL]) || Number(row[COL.TEMPS_REEL]) || 0;
+        s.ca += Number(row[COL.CA_FORFAIT]) || 0;
+        s.caTC += Number(row[COL.CA_TEMPS_COMPL]) || 0;
+        s.gainH += Number(row[COL.GAIN_H]) || 0;
+        s.gainE += Number(row[COL.GAIN_E]) || 0;
+        const ta = row[COL.TECHNICIEN] || 'TA1';
+        if (s.byTA[ta]) {
+          s.byTA[ta].count += 1;
+          s.byTA[ta].heures += Number(row[COL.TEMPS_TOTAL]) || Number(row[COL.TEMPS_REEL]) || 0;
+          s.byTA[ta].ca += Number(row[COL.CA_FORFAIT]) || 0;
+        }
+      });
+
+      return stats;
+    }
+
+    function getLast12Months() {
+      // Retourne les 12 derniers mois (du plus ancien au plus récent), ainsi que la clé du mois en cours
+      const now = new Date();
+      const months = [];
+      for (let i = 11; i >= 0; i--) {
+        const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+        const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+        const monthNames = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Août', 'Sep', 'Oct', 'Nov', 'Déc'];
+        months.push({
+          key: key,
+          year: d.getFullYear(),
+          month: d.getMonth(),
+          label: `${monthNames[d.getMonth()]} ${String(d.getFullYear()).slice(2)}`,
+          fullLabel: `${monthNames[d.getMonth()]}. ${d.getFullYear()}`
+        });
+      }
+      const currentKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+      return { months, currentKey };
+    }
+
+    function openStatsModal() {
+      // Recalculer les stats à chaque ouverture (basé sur les données fraîches)
+      statsByMonth = computeMonthlyStats();
+      const { months, currentKey } = getLast12Months();
+
+      // === Carte mois en cours ===
+      const currentStats = statsByMonth[currentKey] || { count: 0, heures: 0, ca: 0, gainH: 0, gainE: 0 };
+      const monthNamesLong = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+      const now = new Date();
+      const currentMonthLabel = `${monthNamesLong[now.getMonth()]} ${now.getFullYear()}`;
+      const fmtH = (n) => n.toFixed(1).replace('.', ',') + ' h';
+      const fmtE = (n) => Math.round(n).toLocaleString('fr-FR') + ' €';
+      const fmtSignH = (n) => (n >= 0 ? '+' : '') + fmtH(n);
+      const fmtSignE = (n) => (n >= 0 ? '+' : '') + fmtE(n);
+
+      document.getElementById('stats-current-month').innerHTML = `
+        <h4>Mois en cours</h4>
+        <div class="month-name">${currentMonthLabel}</div>
+        <div class="stats-row">
+          <div class="stat-item">
+            <div class="stat-label">Interventions</div>
+            <div class="stat-value">${currentStats.count}</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-label">Heures réalisées</div>
+            <div class="stat-value">${fmtH(currentStats.heures)}</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-label">CA forfait</div>
+            <div class="stat-value">${fmtE(currentStats.ca)}</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-label">Gain prod.</div>
+            <div class="stat-value">${fmtSignH(currentStats.gainH)} / ${fmtSignE(currentStats.gainE)}</div>
+          </div>
+        </div>
+      `;
+
+      // === Tableau détaillé (12 mois, du plus récent au plus ancien) ===
+      let tableHtml = '';
+      [...months].reverse().forEach(m => {
+        const s = statsByMonth[m.key];
+        const isCurrent = m.key === currentKey;
+        if (s) {
+          tableHtml += `
+            <tr class="${isCurrent ? 'current-month' : ''}">
+              <td>${m.fullLabel}</td>
+              <td class="num">${s.count}</td>
+              <td class="num">${fmtH(s.heures)}</td>
+              <td class="num">${fmtE(s.ca)}</td>
+              <td class="num">${fmtSignH(s.gainH)} / ${fmtSignE(s.gainE)}</td>
+            </tr>
+          `;
+        } else {
+          tableHtml += `
+            <tr class="${isCurrent ? 'current-month' : ''}" style="opacity: 0.5;">
+              <td>${m.fullLabel}</td>
+              <td class="num">—</td>
+              <td class="num">—</td>
+              <td class="num">—</td>
+              <td class="num">—</td>
+            </tr>
+          `;
+        }
+      });
+      document.getElementById('stats-table-body').innerHTML = tableHtml;
+
+      // === Afficher la modale puis le graphique ===
+      document.getElementById('stats-modal').classList.remove('hidden');
+      // Réinitialiser sur l'onglet "CA forfait"
+      document.querySelectorAll('.stats-tab').forEach(t => t.classList.remove('active'));
+      document.querySelector('.stats-tab[data-metric="ca"]').classList.add('active');
+      // Petit délai pour que le canvas soit visible avant de dessiner
+      setTimeout(() => renderStatsChart('ca'), 50);
+    }
+
+    function renderStatsChart(metric) {
+      if (typeof Chart === 'undefined') {
+        console.warn('Chart.js non chargé, graphique indisponible');
+        return;
+      }
+      const { months } = getLast12Months();
+      const labels = months.map(m => m.label);
+
+      // Préparer les données selon la métrique choisie
+      let label, data, color, formatter;
+      if (metric === 'ca') {
+        label = 'CA forfait (€)';
+        data = months.map(m => statsByMonth[m.key] ? Math.round(statsByMonth[m.key].ca) : 0);
+        color = '#2563eb';
+        formatter = (v) => v.toLocaleString('fr-FR') + ' €';
+      } else if (metric === 'heures') {
+        label = 'Heures réalisées';
+        data = months.map(m => statsByMonth[m.key] ? Math.round(statsByMonth[m.key].heures * 10) / 10 : 0);
+        color = '#10b981';
+        formatter = (v) => v.toFixed(1).replace('.', ',') + ' h';
+      } else if (metric === 'count') {
+        label = 'Nombre d\'interventions';
+        data = months.map(m => statsByMonth[m.key] ? statsByMonth[m.key].count : 0);
+        color = '#f59e0b';
+        formatter = (v) => v + ' interv.';
+      } else if (metric === 'gain') {
+        label = 'Gain productivité (€)';
+        data = months.map(m => statsByMonth[m.key] ? Math.round(statsByMonth[m.key].gainE) : 0);
+        color = '#8b5cf6';
+        formatter = (v) => (v >= 0 ? '+' : '') + v.toLocaleString('fr-FR') + ' €';
+      }
+
+      const canvas = document.getElementById('stats-chart');
+      const ctx = canvas.getContext('2d');
+
+      // Détruire l'ancien graphique
+      if (statsChart) statsChart.destroy();
+
+      statsChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: label,
+            data: data,
+            borderColor: color,
+            backgroundColor: color + '20',
+            borderWidth: 2.5,
+            tension: 0.3,
+            fill: true,
+            pointBackgroundColor: color,
+            pointRadius: 4,
+            pointHoverRadius: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: (ctx) => formatter(ctx.parsed.y)
+              }
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: {
+                callback: (v) => formatter(v).replace(' interv.', '').replace(' €', '€').replace(' h', 'h')
+              }
+            }
+          }
+        }
+      });
+    }
+
+    // =====================================================
+    // =====================================================
+    // URGENCE
+    // =====================================================
+    let editingUrgenceIdx = null;
+
+    function renderUrgences() {
+      const section = document.getElementById('urgence-section');
+      const list = document.getElementById('urgence-list');
+      const countEl = document.getElementById('urgence-count');
+      if (!selectedMonday) { section.classList.add('hidden'); return; }
+
+      // Bornes de la semaine
+      const weekStart = new Date(selectedMonday);
+      weekStart.setHours(0, 0, 0, 0);
+      const weekEnd = new Date(selectedMonday);
+      weekEnd.setDate(selectedMonday.getDate() + 5);
+      weekEnd.setHours(23, 59, 59, 999);
+
+      const urgences = allInterventions
+        .map((row, idx) => ({ row, idx }))
+        .filter(({ row }) => {
+          if (!isUrgence(row)) return false;
+          const date = serialToDate(row[COL.DATE]);
+          if (!date) return false;
+          return date.getTime() >= weekStart.getTime() && date.getTime() <= weekEnd.getTime();
+        })
+        .sort((a, b) => {
+          const dateA = Number(a.row[COL.DATE]) || 0;
+          const dateB = Number(b.row[COL.DATE]) || 0;
+          if (dateA !== dateB) return dateA - dateB;
+          // Tri secondaire par TA
+          return (a.row[COL.TECHNICIEN] || '').localeCompare(b.row[COL.TECHNICIEN] || '');
+        });
+
+      if (urgences.length === 0) { section.classList.add('hidden'); return; }
+      section.classList.remove('hidden');
+      countEl.textContent = urgences.length === 1 ? '1 urgence' : `${urgences.length} urgences`;
+
+      const fmtH = (n) => n.toFixed(1).replace('.', ',') + ' h';
+      const fmtE = (n) => n.toFixed(2).replace('.', ',') + ' €';
+
+      let html = '';
+      urgences.forEach(({ row, idx }) => {
+        const date = serialToDate(row[COL.DATE]);
+        const dayLabel = date
+          ? `${DAYS[(date.getDay() + 6) % 7]}<br>${String(date.getDate()).padStart(2,'0')}/${String(date.getMonth()+1).padStart(2,'0')}`
+          : '—';
+        const ta = row[COL.TECHNICIEN] || 'TA1';
+        const taClass = ta.toLowerCase();
+        const client = row[COL.CLIENT] || '—';
+        const forfait = row[COL.FORFAIT] || '';
+        const designation = row[COL.DESIGNATION] || '';
+        const duree = Number(row[COL.TEMPS_REEL]) || 0;
+        const ca = Number(row[COL.CA_FORFAIT]) || 0;
+        const tel = (row[COL.TEL] || '').trim();
+
+        html += `
+          <div class="urgence-item">
+            <div class="urgence-day">${dayLabel}</div>
+            <span class="urgence-ta-badge ${taClass}">${ta}</span>
+            <div class="urgence-content">
+              <div class="urgence-name">${escapeHtml(client)}</div>
+              <div class="urgence-detail">
+                <span>🔧 ${escapeHtml(forfait)}${designation ? ' - ' + escapeHtml(designation) : ''}</span>
+                ${duree ? `<span>⏱️ ${fmtH(duree)}</span>` : ''}
+                ${ca ? `<span>💰 ${fmtE(ca)}</span>` : ''}
+              </div>
+            </div>
+            <div class="urgence-actions">
+              <button class="secondary compact" onclick="openInterventionModal(${idx})">📋</button>
+              <button class="secondary compact" onclick="editUrgence(${idx})">✏️</button>
+              <button class="danger compact" onclick="deleteUrgence(${idx})">🗑️</button>
+            </div>
+          </div>
+        `;
+      });
+      list.innerHTML = html;
+    }
+
+    function openUrgenceForm(dataIdx) {
+      if (!selectedMonday) {
+        alert('Sélectionnez d\'abord une semaine dans le calendrier');
+        return;
+      }
+      editingUrgenceIdx = dataIdx;
+
+      // Remplir le sélecteur de jour avec les 6 jours de la semaine
+      const jourSelect = document.getElementById('urg-jour');
+      jourSelect.innerHTML = '';
+      for (let i = 0; i < 6; i++) {
+        const d = new Date(selectedMonday);
+        d.setDate(selectedMonday.getDate() + i);
+        const opt = document.createElement('option');
+        opt.value = i;
+        opt.textContent = `${DAYS[i]} ${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}`;
+        jourSelect.appendChild(opt);
+      }
+
+      // Remplir le sélecteur de forfait (depuis assortiment chargé)
+      const forfaitSelect = document.getElementById('urg-forfait');
+      forfaitSelect.innerHTML = '<option value="">— Choisir un forfait —</option>';
+      assortiment.forEach(f => {
+        const opt = document.createElement('option');
+        opt.value = f.code;
+        opt.textContent = `${f.code} - ${f.designation}`;
+        forfaitSelect.appendChild(opt);
+      });
+
+      // Reset
+      document.getElementById('urg-client').value = '';
+      document.getElementById('urg-tel').value = '';
+      document.getElementById('urg-email').value = '';
+      document.getElementById('urg-vehicule').value = '';
+      document.getElementById('urg-immat').value = '';
+      document.getElementById('urg-commentaire').value = '';
+      document.getElementById('urg-ta').value = 'TA1';
+      document.getElementById('urg-forfait-info').textContent = 'Prix : — • Durée : —';
+      document.getElementById('urgence-feedback').className = 'form-feedback';
+      document.getElementById('urgence-feedback').textContent = '';
+
+      // Si édition, pré-remplir
+      if (dataIdx !== null && allInterventions[dataIdx]) {
+        const r = allInterventions[dataIdx];
+        document.getElementById('urg-client').value = r[COL.CLIENT] || '';
+        document.getElementById('urg-tel').value = r[COL.TEL] || '';
+        document.getElementById('urg-email').value = r[COL.EMAIL] || '';
+        document.getElementById('urg-vehicule').value = r[COL.VEHICULE] || '';
+        document.getElementById('urg-immat').value = r[COL.IMMAT] || '';
+        document.getElementById('urg-commentaire').value = r[COL.COMMENTAIRE] || '';
+        document.getElementById('urg-ta').value = r[COL.TECHNICIEN] || 'TA1';
+        document.getElementById('urg-forfait').value = r[COL.FORFAIT] || '';
+        // Position du jour dans la semaine
+        const date = serialToDate(r[COL.DATE]);
+        if (date) {
+          const dayOfWeek = (date.getDay() + 6) % 7;
+          document.getElementById('urg-jour').value = dayOfWeek;
+        }
+        updateUrgenceForfaitInfo();
+        document.getElementById('urgence-modal-title').textContent = '✏️ Modifier urgence';
+        document.getElementById('btn-submit-urgence').textContent = '✅ Enregistrer';
+      } else {
+        document.getElementById('urgence-modal-title').textContent = '⚡ Nouvelle urgence';
+        document.getElementById('btn-submit-urgence').textContent = '✅ Valider';
+      }
+
+      document.getElementById('urgence-modal').classList.remove('hidden');
+      setTimeout(() => document.getElementById('urg-client').focus(), 100);
+    }
+
+    function closeUrgenceForm() {
+      document.getElementById('urgence-modal').classList.add('hidden');
+      editingUrgenceIdx = null;
+    }
+
+    function editUrgence(dataIdx) {
+      openUrgenceForm(dataIdx);
+    }
+
+    function updateUrgenceForfaitInfo() {
+      const code = document.getElementById('urg-forfait').value;
+      const info = document.getElementById('urg-forfait-info');
+      if (!code) { info.textContent = 'Prix : — • Durée : —'; return; }
+      const f = assortiment.find(x => x.code === code);
+      if (!f) { info.textContent = 'Forfait introuvable'; return; }
+      const prix = f.prix.toFixed(2).replace('.', ',');
+      info.textContent = `Prix : ${prix} € • Durée : ${f.duree} h`;
+    }
+
+    async function deleteUrgence(dataIdx) {
+      const r = allInterventions[dataIdx];
+      if (!r) return;
+      const client = r[COL.CLIENT] || 'Sans nom';
+      const confirmed = confirm(`Supprimer l'urgence "${client}" ?\n\nCette action est définitive.`);
+      if (!confirmed) return;
+
+      try {
+        const gid = await fetchDonneesSheetGid();
+        const rowIndex = dataIdx + 1;
+        const url = `https://sheets.googleapis.com/v4/spreadsheets/${getCurrentSheetId()}:batchUpdate`;
+        const body = {
+          requests: [{
+            deleteDimension: {
+              range: { sheetId: gid, dimension: 'ROWS', startIndex: rowIndex, endIndex: rowIndex + 1 }
+            }
+          }]
+        };
+        const res = await fetch(url, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        await loadAndRender(true);
+      } catch (err) {
+        console.error('Erreur suppression urgence:', err);
+        alert('❌ Erreur lors de la suppression : ' + err.message);
+      }
+    }
+
+    async function submitUrgenceForm() {
+      const submitBtn = document.getElementById('btn-submit-urgence');
+      submitBtn.disabled = true;
+      submitBtn.textContent = '⏳ Enregistrement...';
+
+      const showFeedback = (msg, type) => {
+        const el = document.getElementById('urgence-feedback');
+        el.textContent = msg;
+        el.className = `form-feedback ${type}`;
+      };
+
+      try {
+        const jourIdx = parseInt(document.getElementById('urg-jour').value);
+        const ta = document.getElementById('urg-ta').value;
+        const forfaitCode = document.getElementById('urg-forfait').value;
+        const client = document.getElementById('urg-client').value.trim();
+
+        if (!forfaitCode) throw new Error('Forfait obligatoire');
+        if (!client) throw new Error('Client obligatoire');
+
+        const f = assortiment.find(x => x.code === forfaitCode);
+        if (!f) throw new Error('Forfait introuvable dans ASSORTIMENT');
+
+        // Date = jour sélectionné de la semaine
+        const date = new Date(selectedMonday);
+        date.setDate(selectedMonday.getDate() + jourIdx);
+        const dateSerial = dateToSerial(date);
+
+        // Calculs
+        const tempsReel = f.duree;
+        const caForfait = f.prix;
+        const prixNetFinal = f.prixNet;
+
+        const isEditing = (editingUrgenceIdx !== null);
+        const id = isEditing
+          ? (allInterventions[editingUrgenceIdx][COL.ID] || (URGENCE_ID_PREFIX + generateUUID()))
+          : (URGENCE_ID_PREFIX + generateUUID());
+
+        const newRow = [
+          id,                                                       // A : ID (URG_xxx)
+          dateSerial,                                               // B : Date (jour précis)
+          0,                                                        // C : Row (pas de slot)
+          0,                                                        // D : Col (pas de col)
+          client,                                                   // E : Client
+          '',                                                       // F : N° client
+          document.getElementById('urg-tel').value || '',           // G : Téléphone
+          forfaitCode,                                              // H : Forfait (normal, pas FILROUGE)
+          f.designation || '',                                      // I : Désignation
+          tempsReel,                                                // J : Temps réel
+          0,                                                        // K : Temps complémentaire
+          '',                                                       // L : Intervenant
+          'NON',                                                    // M : Fidélité
+          document.getElementById('urg-commentaire').value || '',   // N : Commentaire
+          caForfait,                                                // O : CA forfait
+          f.pfa,                                                    // P : Dont PFA
+          f.recyclage,                                              // Q : Dont recyclage
+          prixNetFinal,                                             // R : Prix net
+          tempsReel,                                                // S : Durée prévue
+          tempsReel,                                                // T : Temps total
+          0,                                                        // U : Gain h
+          0,                                                        // V : Gain €
+          '',                                                       // W : Km
+          document.getElementById('urg-vehicule').value || '',      // X : Véhicule
+          document.getElementById('urg-immat').value || '',         // Y : Immat
+          'NON',                                                    // Z : FPPEC2
+          0,                                                        // AA : CA FPPEC2
+          '',                                                       // AB : Réf MOPA
+          0,                                                        // AC : CA temps compl
+          0,                                                        // AD : PFA TC
+          0,                                                        // AE : Recyclage TC
+          0,                                                        // AF : MOPA PFA
+          ta,                                                       // AG : Technicien (TA1/2/3)
+          document.getElementById('urg-email').value.trim() || ''   // AH : Email
+        ];
+
+        showFeedback('💾 Enregistrement...', 'info');
+
+        let url, method;
+        if (isEditing) {
+          const rowInSheet = editingUrgenceIdx + 2;
+          url = `https://sheets.googleapis.com/v4/spreadsheets/${getCurrentSheetId()}/values/DONNEES_OK!A${rowInSheet}:AH${rowInSheet}?valueInputOption=RAW`;
+          method = 'PUT';
+        } else {
+          url = `https://sheets.googleapis.com/v4/spreadsheets/${getCurrentSheetId()}/values/DONNEES_OK!A:AH:append?valueInputOption=RAW&insertDataOption=INSERT_ROWS`;
+          method = 'POST';
+        }
+
+        const res = await fetch(url, {
+          method: method,
+          headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ values: [newRow] })
+        });
+        if (!res.ok) {
+          const errText = await res.text();
+          throw new Error(`HTTP ${res.status} : ${errText}`);
+        }
+
+        showFeedback(isEditing ? '✅ Urgence modifiée !' : '✅ Urgence ajoutée !', 'success');
+
+        setTimeout(async () => {
+          closeUrgenceForm();
+          await loadAndRender(true);
+        }, 800);
+
+      } catch (err) {
+        console.error('Erreur urgence:', err);
+        showFeedback('❌ ' + err.message, 'error');
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = (editingUrgenceIdx !== null) ? '✅ Enregistrer' : '✅ Valider';
+      }
+    }
+
+    // =====================================================
+    // FIL ROUGE
+    // =====================================================
+    let editingFilrougeIdx = null;  // Index du fil rouge en cours d'édition
+
+    function renderFilrouge() {
+      const section = document.getElementById('filrouge-section');
+      const list = document.getElementById('filrouge-list');
+      const countEl = document.getElementById('filrouge-count');
+      if (!selectedMonday) {
+        section.classList.add('hidden');
+        return;
+      }
+
+      // Calculer les bornes de la semaine
+      const weekStart = new Date(selectedMonday);
+      weekStart.setHours(0, 0, 0, 0);
+      const weekEnd = new Date(selectedMonday);
+      weekEnd.setDate(selectedMonday.getDate() + 5);
+      weekEnd.setHours(23, 59, 59, 999);
+
+      // Filtrer les fils rouges de cette semaine
+      const filsRouges = allInterventions
+        .map((row, idx) => ({ row, idx }))
+        .filter(({ row }) => {
+          if (!isFilRouge(row)) return false;
+          const date = serialToDate(row[COL.DATE]);
+          if (!date) return false;
+          return date.getTime() >= weekStart.getTime() && date.getTime() <= weekEnd.getTime();
+        });
+
+      // Afficher / masquer la section
+      if (filsRouges.length === 0) {
+        section.classList.add('hidden');
+        return;
+      }
+      section.classList.remove('hidden');
+      countEl.textContent = filsRouges.length === 1 ? '1 fil rouge' : `${filsRouges.length} fils rouges`;
+
+      const fmtH = (n) => n.toFixed(1).replace('.', ',') + ' h';
+      const fmtE = (n) => n.toFixed(2).replace('.', ',') + ' €';
+
+      let html = '';
+      filsRouges.forEach(({ row, idx }) => {
+        // Le nom est dans DESIGNATION (ex: "Pose attelage Mr Dupont")
+        // ou dans CLIENT en fallback (qui contient "FIL ROUGE: [nom]")
+        let nom = row[COL.DESIGNATION] || '';
+        if (!nom) {
+          const client = row[COL.CLIENT] || '';
+          nom = client.replace(/^FIL ROUGE:\s*/i, '');
+        }
+        nom = nom || 'Sans nom';
+
+        const duree = Number(row[COL.TEMPS_REEL]) || 0;
+        const ca = Number(row[COL.CA_FORFAIT]) || 0;
+        // Couleur stockée dans MOPA_PFA (col 31) à partir de la PWA, ou rouge par défaut
+        const couleurKey = (row[COL.MOPA_PFA] && typeof row[COL.MOPA_PFA] === 'string')
+          ? row[COL.MOPA_PFA].toUpperCase()
+          : 'ROUGE';
+        const couleur = FILROUGE_COLORS[couleurKey] || FILROUGE_COLORS.ROUGE;
+
+        html += `
+          <div class="filrouge-item">
+            <div class="filrouge-color-dot" style="background: ${couleur};"></div>
+            <div class="filrouge-content">
+              <div class="filrouge-name">${escapeHtml(nom)}</div>
+              <div class="filrouge-meta">
+                <span>⏱️ ${fmtH(duree)}</span>
+                <span>💰 ${fmtE(ca)}</span>
+              </div>
+            </div>
+            <div class="filrouge-actions">
+              <button class="secondary compact" onclick="editFilrouge(${idx})">✏️</button>
+              <button class="danger compact" onclick="deleteFilrouge(${idx})">🗑️</button>
+            </div>
+          </div>
+        `;
+      });
+      list.innerHTML = html;
+    }
+
+    function openFilrougeForm(dataIdx) {
+      if (!selectedMonday) {
+        alert('Sélectionnez d\'abord une semaine dans le calendrier');
+        return;
+      }
+
+      editingFilrougeIdx = dataIdx;
+
+      // Reset
+      document.getElementById('fr-name').value = '';
+      document.getElementById('fr-duree').value = '';
+      document.getElementById('fr-ca').value = '';
+      document.getElementById('fr-couleur').value = 'ROUGE';
+      document.getElementById('filrouge-feedback').className = 'form-feedback';
+      document.getElementById('filrouge-feedback').textContent = '';
+
+      // Si édition, pré-remplir
+      if (dataIdx !== null && allInterventions[dataIdx]) {
+        const row = allInterventions[dataIdx];
+        let nom = row[COL.DESIGNATION] || '';
+        if (!nom) {
+          const client = row[COL.CLIENT] || '';
+          nom = client.replace(/^FIL ROUGE:\s*/i, '');
+        }
+        document.getElementById('fr-name').value = nom;
+        document.getElementById('fr-duree').value = Number(row[COL.TEMPS_REEL]) || '';
+        document.getElementById('fr-ca').value = Number(row[COL.CA_FORFAIT]) || '';
+        const couleurKey = (row[COL.MOPA_PFA] && typeof row[COL.MOPA_PFA] === 'string')
+          ? row[COL.MOPA_PFA].toUpperCase()
+          : 'ROUGE';
+        if (FILROUGE_COLORS[couleurKey]) {
+          document.getElementById('fr-couleur').value = couleurKey;
+        }
+        document.getElementById('filrouge-modal-title').textContent = '✏️ Modifier fil rouge';
+        document.getElementById('btn-submit-filrouge').textContent = '✅ Enregistrer';
+      } else {
+        document.getElementById('filrouge-modal-title').textContent = '🧵 Nouveau fil rouge';
+        document.getElementById('btn-submit-filrouge').textContent = '✅ Valider';
+      }
+
+      document.getElementById('filrouge-modal').classList.remove('hidden');
+      setTimeout(() => document.getElementById('fr-name').focus(), 100);
+    }
+
+    function closeFilrougeForm() {
+      document.getElementById('filrouge-modal').classList.add('hidden');
+      editingFilrougeIdx = null;
+    }
+
+    function editFilrouge(dataIdx) {
+      openFilrougeForm(dataIdx);
+    }
+
+    async function deleteFilrouge(dataIdx) {
+      const r = allInterventions[dataIdx];
+      if (!r) return;
+      let nom = r[COL.DESIGNATION] || '';
+      if (!nom) {
+        const client = r[COL.CLIENT] || '';
+        nom = client.replace(/^FIL ROUGE:\s*/i, '');
+      }
+      const confirmed = confirm(`Supprimer le fil rouge "${nom || 'Sans nom'}" ?\n\nCette action est définitive.`);
+      if (!confirmed) return;
+
+      try {
+        const gid = await fetchDonneesSheetGid();
+        const rowIndex = dataIdx + 1;
+        const url = `https://sheets.googleapis.com/v4/spreadsheets/${getCurrentSheetId()}:batchUpdate`;
+        const body = {
+          requests: [{
+            deleteDimension: {
+              range: {
+                sheetId: gid,
+                dimension: 'ROWS',
+                startIndex: rowIndex,
+                endIndex: rowIndex + 1
+              }
+            }
+          }]
+        };
+        const res = await fetch(url, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${accessToken}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(body)
+        });
+        if (!res.ok) {
+          const errText = await res.text();
+          throw new Error(`HTTP ${res.status} : ${errText}`);
+        }
+        await loadAndRender(true);
+      } catch (err) {
+        console.error('Erreur suppression fil rouge:', err);
+        alert('❌ Erreur lors de la suppression : ' + err.message);
+      }
+    }
+
+    async function submitFilrougeForm() {
+      const submitBtn = document.getElementById('btn-submit-filrouge');
+      submitBtn.disabled = true;
+      submitBtn.textContent = '⏳ Enregistrement...';
+
+      const showFR = (msg, type) => {
+        const el = document.getElementById('filrouge-feedback');
+        el.textContent = msg;
+        el.className = `form-feedback ${type}`;
+      };
+
+      try {
+        const nom = document.getElementById('fr-name').value.trim();
+        const duree = Number(document.getElementById('fr-duree').value);
+        const ca = Number(document.getElementById('fr-ca').value) || 0;
+        const couleurKey = document.getElementById('fr-couleur').value;
+
+        if (!nom) throw new Error('Le nom est obligatoire');
+        if (!duree || duree <= 0) throw new Error('La durée doit être positive');
+        if (ca < 0) throw new Error('Le CA doit être positif ou zéro');
+
+        // Date = lundi de la semaine courante (le fil rouge est lié à la semaine, pas à un jour précis)
+        const dateSerial = dateToSerial(selectedMonday);
+
+        const isEditing = (editingFilrougeIdx !== null);
+        const id = isEditing
+          ? (allInterventions[editingFilrougeIdx][COL.ID] || (FILROUGE_ID_PREFIX + generateUUID()))
+          : (FILROUGE_ID_PREFIX + generateUUID());
+
+        // Construire la ligne (33 colonnes A → AG, + AH = email vide)
+        // Stocker la couleur dans MOPA_PFA (col AF, index 31) qui n'est pas utilisée pour les fils rouges
+        const newRow = [
+          id,                                                   // A : ID (FR_xxx)
+          dateSerial,                                           // B : Date (lundi)
+          0,                                                    // C : Row (pas de slot)
+          0,                                                    // D : Col (pas de TA)
+          'FIL ROUGE: ' + nom,                                  // E : Client
+          '',                                                   // F : N° client
+          '',                                                   // G : Téléphone
+          FILROUGE_TAG,                                         // H : Forfait = FILROUGE
+          nom,                                                  // I : Désignation = nom du fil rouge
+          duree,                                                // J : Temps réel
+          0,                                                    // K : Temps complémentaire
+          '',                                                   // L : Intervenant
+          'NON',                                                // M : Fidélité
+          '',                                                   // N : Commentaire
+          ca,                                                   // O : CA forfait
+          0,                                                    // P : Dont PFA
+          0,                                                    // Q : Dont recyclage
+          ca,                                                   // R : Prix net forfait
+          duree,                                                // S : Durée prévue
+          duree,                                                // T : Temps total
+          0,                                                    // U : Gain prod h
+          0,                                                    // V : Gain prod €
+          '',                                                   // W : Km
+          '',                                                   // X : Véhicule
+          '',                                                   // Y : Immat
+          'NON',                                                // Z : FPPEC2
+          0,                                                    // AA : CA FPPEC2
+          '',                                                   // AB : Réf MOPA
+          0,                                                    // AC : CA temps compl
+          0,                                                    // AD : PFA temps compl
+          0,                                                    // AE : Recyclage temps compl
+          couleurKey,                                           // AF : Couleur (MOPA_PFA réutilisé)
+          '',                                                   // AG : Technicien (vide)
+          ''                                                    // AH : Email
+        ];
+
+        showFR('💾 Enregistrement...', 'info');
+
+        let url, method;
+        if (isEditing) {
+          const rowInSheet = editingFilrougeIdx + 2;
+          url = `https://sheets.googleapis.com/v4/spreadsheets/${getCurrentSheetId()}/values/DONNEES_OK!A${rowInSheet}:AH${rowInSheet}?valueInputOption=RAW`;
+          method = 'PUT';
+        } else {
+          url = `https://sheets.googleapis.com/v4/spreadsheets/${getCurrentSheetId()}/values/DONNEES_OK!A:AH:append?valueInputOption=RAW&insertDataOption=INSERT_ROWS`;
+          method = 'POST';
+        }
+
+        const res = await fetch(url, {
+          method: method,
+          headers: {
+            'Authorization': `Bearer ${accessToken}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ values: [newRow] })
+        });
+
+        if (!res.ok) {
+          const errText = await res.text();
+          throw new Error(`HTTP ${res.status} : ${errText}`);
+        }
+
+        showFR(isEditing ? '✅ Fil rouge modifié !' : '✅ Fil rouge ajouté !', 'success');
+
+        setTimeout(async () => {
+          closeFilrougeForm();
+          await loadAndRender(true);
+        }, 800);
+
+      } catch (err) {
+        console.error('Erreur fil rouge:', err);
+        showFR('❌ ' + err.message, 'error');
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = (editingFilrougeIdx !== null) ? '✅ Enregistrer' : '✅ Valider';
+      }
+    }
+
+    // =====================================================
+    // HISTORIQUE CLIENT
+    // =====================================================
+    function openClientHistory(dataIdx) {
+      const r = allInterventions[dataIdx];
+      if (!r) return;
+      const clientName = (r[COL.CLIENT] || '').trim();
+      if (!clientName) {
+        alert('⚠️ Pas de nom client pour cette intervention');
+        return;
+      }
+
+      // Normaliser le nom pour la comparaison (insensible à la casse et aux accents)
+      const queryNorm = removeAccents(clientName.toLowerCase());
+
+      // Filtrer toutes les interventions de ce client (y compris les fils rouges)
+      const matches = allInterventions
+        .map((row, idx) => ({ row, idx }))
+        .filter(({ row }) => {
+          const c = removeAccents((row[COL.CLIENT] || '').toLowerCase());
+          // Match exact normalisé OU match partiel "contient le nom"
+          return c === queryNorm || c.includes(queryNorm) || queryNorm.includes(c);
+        })
+        // Tri : plus récent en premier
+        .sort((a, b) => {
+          const dateA = Number(a.row[COL.DATE]) || 0;
+          const dateB = Number(b.row[COL.DATE]) || 0;
+          return dateB - dateA;
+        });
+
+      // Calcul des stats
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const todayTs = today.getTime();
+
+      let totalCount = 0;
+      let totalCA = 0;
+      let totalHeures = 0;
+      let upcomingCount = 0;
+      const vehicules = new Set();
+
+      matches.forEach(({ row }) => {
+        totalCount += 1;
+        totalCA += Number(row[COL.CA_FORFAIT]) || 0;
+        totalHeures += Number(row[COL.TEMPS_REEL]) || 0;
+        const date = serialToDate(row[COL.DATE]);
+        if (date && date.getTime() >= todayTs) upcomingCount += 1;
+        const v = (row[COL.VEHICULE] || '').trim();
+        const i = (row[COL.IMMAT] || '').trim();
+        if (v || i) vehicules.add(`${v}${i ? ' (' + i + ')' : ''}`);
+      });
+
+      // Mettre à jour le titre
+      document.getElementById('history-title').textContent = `📜 Historique — ${clientName}`;
+
+      // Carte stats
+      const fmtH = (n) => n.toFixed(1).replace('.', ',') + ' h';
+      const fmtE = (n) => n.toFixed(2).replace('.', ',') + ' €';
+      let statsHtml = `
+        <div class="history-stat-item">
+          <div class="history-stat-label">Interventions</div>
+          <div class="history-stat-value">${totalCount}</div>
+        </div>
+        <div class="history-stat-item">
+          <div class="history-stat-label">CA total</div>
+          <div class="history-stat-value">${fmtE(totalCA)}</div>
+        </div>
+        <div class="history-stat-item">
+          <div class="history-stat-label">Heures cumulées</div>
+          <div class="history-stat-value">${fmtH(totalHeures)}</div>
+        </div>
+      `;
+      if (upcomingCount > 0) {
+        statsHtml += `
+          <div class="history-stat-item">
+            <div class="history-stat-label">À venir</div>
+            <div class="history-stat-value">${upcomingCount}</div>
+          </div>
+        `;
+      }
+      document.getElementById('history-stats').innerHTML = statsHtml;
+
+      // Liste
+      const list = document.getElementById('history-list');
+      if (matches.length === 0) {
+        list.innerHTML = '<div class="history-empty">Aucune intervention trouvée pour ce client</div>';
+      } else {
+        const monthsShort = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Août', 'Sep', 'Oct', 'Nov', 'Déc'];
+        let html = '';
+        matches.forEach(({ row, idx }) => {
+          const date = serialToDate(row[COL.DATE]);
+          const isUpcoming = date && date.getTime() >= todayTs;
+          const dayNum = date ? date.getDate() : '?';
+          const monthYear = date ? `${monthsShort[date.getMonth()]} ${date.getFullYear()}` : '—';
+          const forfait = row[COL.FORFAIT] || '';
+          const designation = row[COL.DESIGNATION] || '';
+          const ca = Number(row[COL.CA_FORFAIT]) || 0;
+          const duree = Number(row[COL.TEMPS_REEL]) || 0;
+          const ta = row[COL.TECHNICIEN] || '';
+          const vehicule = row[COL.VEHICULE] || '';
+          const immat = row[COL.IMMAT] || '';
+          const isFR = isFilRouge(row);
+
+          // Heure depuis ROW (sauf fil rouge)
+          let heureStr = '';
+          if (!isFR) {
+            const slotIdx = (Number(row[COL.ROW]) || ROW_OFFSET) - ROW_OFFSET;
+            const heureNum = WORK_HOURS_START + slotIdx * 0.5;
+            const hh = Math.floor(heureNum);
+            const mm = (heureNum - hh) * 60;
+            heureStr = `${String(hh).padStart(2,'0')}:${String(mm).padStart(2,'0')}`;
+          }
+
+          html += `
+            <div class="history-item ${isUpcoming ? 'upcoming' : ''}" onclick="navigateFromHistory(${idx})">
+              <div class="history-date">
+                <div class="day">${dayNum}</div>
+                <div class="month-year">${monthYear}</div>
+              </div>
+              <div class="history-content">
+                <div class="history-forfait">
+                  ${isFR ? '🧵 ' : ''}${escapeHtml(forfait)}${designation ? ' - ' + escapeHtml(designation) : ''}
+                </div>
+                <div class="history-details">
+                  ${heureStr ? `<span>🕐 ${heureStr}</span>` : '<span>🧵 Fil rouge</span>'}
+                  ${duree ? `<span>⏱️ ${fmtH(duree)}</span>` : ''}
+                  ${ta ? `<span>👤 ${ta}</span>` : ''}
+                  ${vehicule || immat ? `<span>🚗 ${escapeHtml(vehicule)}${immat ? ' (' + escapeHtml(immat) + ')' : ''}</span>` : ''}
+                  ${isUpcoming ? '<span style="color:#92400e;font-weight:600;">⏳ À venir</span>' : ''}
+                </div>
+              </div>
+              <div class="history-amount">${fmtE(ca)}</div>
+            </div>
+          `;
+        });
+        list.innerHTML = html;
+      }
+
+      // Fermer la modale détails et ouvrir l'historique
+      closeModal();
+      document.getElementById('history-modal').classList.remove('hidden');
+    }
+
+    function navigateFromHistory(dataIdx) {
+      // Fermer historique, naviguer vers la semaine, ouvrir détails
+      document.getElementById('history-modal').classList.add('hidden');
+      navigateToIntervention(dataIdx);
+    }
+
+    // =====================================================
+    // GÉNÉRATION OR PDF (via Apps Script)
+    // =====================================================
+    async function generateORPDF(dataIdx) {
+      const r = allInterventions[dataIdx];
+      if (!r) return;
+
+      const interventionId = r[COL.ID];
+      const sheetId = getCurrentSheetId();
+      if (!interventionId || !sheetId) {
+        alert('⚠️ Données manquantes pour générer le PDF');
+        return;
+      }
+
+      // Vérifier que la config est présente
+      if (!CONFIG.PDF_GENERATOR_URL) {
+        alert('⚠️ La génération PDF n\'est pas encore configurée. Contactez l\'administrateur.');
+        return;
+      }
+
+      // Préparer la modale (état : loading)
+      const pdfModal = document.getElementById('pdf-modal');
+      const pdfLoading = document.getElementById('pdf-loading');
+      const pdfSuccess = document.getElementById('pdf-success');
+      const pdfError = document.getElementById('pdf-error');
+      pdfLoading.classList.remove('hidden');
+      pdfSuccess.classList.add('hidden');
+      pdfError.classList.add('hidden');
+      pdfModal.classList.remove('hidden');
+
+      try {
+        // Construire l'URL avec les paramètres
+        const url = new URL(CONFIG.PDF_GENERATOR_URL);
+        url.searchParams.append('sheetId', sheetId);
+        url.searchParams.append('interventionId', interventionId);
+        url.searchParams.append('token', CONFIG.PDF_GENERATOR_TOKEN);
+
+        // Appeler l'Apps Script (timeout 60s)
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 60000);
+
+        const res = await fetch(url.toString(), {
+          method: 'GET',
+          signal: controller.signal
+          // Pas de Authorization car la Web App est en accès "Anyone" + protégée par token
+        });
+        clearTimeout(timeoutId);
+
+        if (!res.ok) {
+          throw new Error(`HTTP ${res.status} : ${res.statusText}`);
+        }
+
+        const result = await res.json();
+
+        if (!result.ok) {
+          throw new Error(result.error || 'Erreur inconnue');
+        }
+
+        // Succès : afficher les liens PDF
+        pdfLoading.classList.add('hidden');
+        pdfSuccess.classList.remove('hidden');
+
+        const files = result.files || [];
+        const btFile = files.find(f => f.name && f.name.includes('_BT'));
+        const fdlFile = files.find(f => f.name && f.name.includes('_FDL'));
+
+        const btLink = document.getElementById('pdf-link-bt');
+        const fdlLink = document.getElementById('pdf-link-fdl');
+        const folderLink = document.getElementById('pdf-link-folder');
+
+        if (btFile && btFile.url) {
+          btLink.href = btFile.url;
+          btLink.classList.remove('hidden');
+        } else {
+          btLink.classList.add('hidden');
+        }
+        if (fdlFile && fdlFile.url) {
+          fdlLink.href = fdlFile.url;
+          fdlLink.classList.remove('hidden');
+        } else {
+          fdlLink.classList.add('hidden');
+        }
+        if (result.folderUrl) {
+          folderLink.href = result.folderUrl;
+          folderLink.classList.remove('hidden');
+        } else {
+          folderLink.classList.add('hidden');
+        }
+
+      } catch (err) {
+        console.error('Erreur génération PDF:', err);
+        pdfLoading.classList.add('hidden');
+        pdfError.classList.remove('hidden');
+        let msg = err.message;
+        if (err.name === 'AbortError') msg = 'Délai dépassé (60s). Réessaie dans quelques instants.';
+        document.getElementById('pdf-error-message').textContent = msg;
+      }
+    }
+
+    function generateUUID() {
+      // UUID v4 simple
+      return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+        const r = Math.random() * 16 | 0;
+        const v = c === 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+      });
+    }
+
+    // =====================================================
+    // APPEL CLIENT (tel:)
+    // =====================================================
+    function callClient(dataIdx) {
+      const r = allInterventions[dataIdx];
+      if (!r) return;
+      const tel = (r[COL.TEL] || '').trim();
+      if (!tel) {
+        alert('⚠️ Pas de numéro de téléphone enregistré pour ce client');
+        return;
+      }
+      // Nettoyer le numéro (garder chiffres et +)
+      const telClean = tel.replace(/[^\d+]/g, '');
+      window.location.href = `tel:${telClean}`;
+    }
+
+    // =====================================================
+    // ENVOI MAIL DE RAPPEL (mailto: avec Reply-To)
+    // =====================================================
+    function sendReminderMail(dataIdx) {
+      const r = allInterventions[dataIdx];
+      if (!r) return;
+
+      const date = serialToDate(r[COL.DATE]);
+      const dateLong = date
+        ? date.toLocaleDateString('fr-FR', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' })
+        : '—';
+      const dateShort = date
+        ? `${String(date.getDate()).padStart(2,'0')}/${String(date.getMonth()+1).padStart(2,'0')}/${date.getFullYear()}`
+        : '';
+
+      // Calculer l'heure de début depuis ROW
+      const slotIdx = (Number(r[COL.ROW]) || ROW_OFFSET) - ROW_OFFSET;
+      const heureNum = WORK_HOURS_START + slotIdx * 0.5;
+      const hh = Math.floor(heureNum);
+      const mm = (heureNum - hh) * 60;
+      const heureStr = `${String(hh).padStart(2,'0')}:${String(mm).padStart(2,'0')}`;
+
+      const client = r[COL.CLIENT] || 'Client';
+      const forfait = r[COL.FORFAIT] || '';
+      const designation = r[COL.DESIGNATION] || '';
+      const vehicule = r[COL.VEHICULE] || '';
+      const immat = r[COL.IMMAT] || '';
+      const tempsReel = Number(r[COL.TEMPS_REEL]) || 0;
+      const emailStocke = (r[COL.EMAIL] || '').trim();
+
+      // Demander l'email du client (pré-rempli si déjà stocké)
+      const emailClient = prompt(
+        `Adresse email du client "${client}" :\n\n(le client pourra répondre directement à ${getCurrentMailReplyTo()})`,
+        emailStocke
+      );
+      if (emailClient === null) return;  // Annulé
+      const emailTrim = emailClient.trim();
+      if (!emailTrim || !emailTrim.includes('@')) {
+        alert('⚠️ Email invalide');
+        return;
+      }
+
+      // Construire le sujet
+      const subject = `Rappel rendez-vous - Narbonne Accessoires ${getCurrentSiteName()}${dateShort ? ' - ' + dateShort : ''}`;
+
+      // Construire le corps du mail
+      let body = `Bonjour ${client},\n\n`;
+      body += `Nous vous confirmons votre rendez-vous à l'atelier Narbonne Accessoires ${getCurrentSiteName()} :\n\n`;
+      body += `📅 Date : ${dateLong}\n`;
+      body += `🕐 Heure : ${heureStr}\n`;
+      if (tempsReel > 0) {
+        body += `⏱️ Durée estimée : ${String(tempsReel).replace('.', ',')} h\n`;
+      }
+      if (forfait || designation) {
+        body += `🔧 Prestation : ${forfait}${designation ? ' - ' + designation : ''}\n`;
+      }
+      if (vehicule || immat) {
+        body += `🚗 Véhicule : ${vehicule}${immat ? ' (' + immat + ')' : ''}\n`;
+      }
+      body += `\nMerci de prévoir d'être présent quelques minutes avant l'heure.\n\n`;
+      body += `En cas d'empêchement, merci de nous prévenir au plus vite par retour de mail.\n\n`;
+      body += `Cordialement,\nL'équipe Narbonne Accessoires ${getCurrentSiteName()}\n`;
+
+      // Construire le lien mailto avec Reply-To
+      // Note : le paramètre "reply-to" du mailto n'est pas standardisé partout (RFC 6068),
+      // mais le plus fiable est de mettre l'adresse de réponse dans cc + reply-to,
+      // ainsi sur tous les clients la réponse partira vers la bonne adresse
+      const params = [];
+      params.push(`subject=${encodeURIComponent(subject)}`);
+      params.push(`body=${encodeURIComponent(body)}`);
+      // Le client mail mettra le Reply-To dans l'entête, ainsi quand le client clique
+      // "Répondre", la réponse part vers DM.aubagne plutôt que l'expéditeur Gmail perso
+      // Note : tous les clients mail ne supportent pas reply-to dans mailto
+      // En fallback, on met l'adresse en cc pour être sûr qu'elle reçoive
+      params.push(`cc=${encodeURIComponent(getCurrentMailReplyTo())}`);
+
+      const mailtoUrl = `mailto:${encodeURIComponent(emailTrim)}?${params.join('&')}`;
+
+      // Ouvrir le client mail (sans quitter la PWA)
+      window.open(mailtoUrl, '_blank');
+    }
+
+    
+    // =====================================================
+    // SUPPRESSION D'INTERVENTION
+    // =====================================================
+    async function fetchDonneesSheetGid() {
+      // Récupère le GID (ID interne) de l'onglet DONNEES_OK pour la suppression de ligne
+      if (donneesSheetGid !== null) return donneesSheetGid;
+      const url = `https://sheets.googleapis.com/v4/spreadsheets/${getCurrentSheetId()}?fields=sheets.properties`;
+      const res = await fetch(url, { headers: { 'Authorization': `Bearer ${accessToken}` } });
+      if (!res.ok) throw new Error('Impossible de récupérer la structure du Sheet');
+      const data = await res.json();
+      const sheet = (data.sheets || []).find(s => s.properties && s.properties.title === 'DONNEES_OK');
+      if (!sheet) throw new Error('Onglet DONNEES_OK introuvable');
+      donneesSheetGid = sheet.properties.sheetId;
+      return donneesSheetGid;
+    }
+
+    async function deleteIntervention(dataIdx) {
+      const r = allInterventions[dataIdx];
+      if (!r) return;
+      const client = r[COL.CLIENT] || 'cette intervention';
+      const date = serialToDate(r[COL.DATE]);
+      const dateStr = date ? `${String(date.getDate()).padStart(2,'0')}/${String(date.getMonth()+1).padStart(2,'0')}/${date.getFullYear()}` : '';
+      const confirmed = confirm(`Supprimer l'intervention de ${client}${dateStr ? ' du ' + dateStr : ''} ?\n\nCette action est définitive.`);
+      if (!confirmed) return;
+
+      try {
+        // Récupérer le GID de l'onglet DONNEES_OK
+        const gid = await fetchDonneesSheetGid();
+        // La ligne dans le Sheet : dataIdx + 2 (en-tête ligne 1, données dès ligne 2)
+        // Mais batchUpdate attend des indices 0-based : startIndex = ligne - 1 = dataIdx + 1
+        const rowIndex = dataIdx + 1;
+
+        const url = `https://sheets.googleapis.com/v4/spreadsheets/${getCurrentSheetId()}:batchUpdate`;
+        const body = {
+          requests: [{
+            deleteDimension: {
+              range: {
+                sheetId: gid,
+                dimension: 'ROWS',
+                startIndex: rowIndex,
+                endIndex: rowIndex + 1
+              }
+            }
+          }]
+        };
+        const res = await fetch(url, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${accessToken}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(body)
+        });
+        if (!res.ok) {
+          const errText = await res.text();
+          throw new Error(`HTTP ${res.status} : ${errText}`);
+        }
+        closeModal();
+        await loadAndRender(true);
+      } catch (err) {
+        console.error('Erreur suppression:', err);
+        alert('❌ Erreur lors de la suppression : ' + err.message);
+      }
+    }
+  </script>
+
+</body>
+</html>
